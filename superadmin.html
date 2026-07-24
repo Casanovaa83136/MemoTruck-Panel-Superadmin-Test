@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MémoTruck — Superadmin</title>
+<link rel="icon" href="icon192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09111B;
+  --surface:#0D1825;
+  --card:#111F2E;
+  --border:rgba(255,255,255,0.07);
+  --accent:#00C2FF;
+  --success:#22C55E;
+  --warning:#F59E0B;
+  --danger:#EF4444;
+  --text:#F1F5F9;
+  --muted:#64748B;
+  --radius:12px;
+  --radius-sm:8px;
+  --sidebar:220px;
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;-webkit-font-smoothing:antialiased}
+
+/* ── LOGIN ── */
+#screen-login{width:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.09) 0%,var(--bg) 65%)}
+.login-box{
+  background:var(--surface);border:1px solid rgba(0,194,255,0.15);
+  border-radius:20px;padding:36px;width:380px;
+  display:flex;flex-direction:column;gap:20px;
+  box-shadow:0 0 60px rgba(0,194,255,0.05);
+}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px}
+.login-logo img{width:48px;height:48px;border-radius:13px;box-shadow:0 0 24px rgba(0,194,255,0.25)}
+.login-logo-text{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px}
+.login-title{font-size:13px;font-weight:700;color:var(--accent);text-align:center;letter-spacing:0.5px}
+.login-sub{font-size:11px;color:var(--muted);text-align:center;margin-top:-8px}
+.login-field{display:flex;flex-direction:column;gap:6px}
+.login-field label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.login-field input{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);
+  font-size:14px;outline:none;font-family:inherit;transition:border-color 0.2s;
+}
+.login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,255,0.08)}
+.btn-login{
+  background:var(--accent);color:#09111B;font-size:13px;font-weight:800;
+  padding:14px;border-radius:var(--radius-sm);border:none;cursor:pointer;
+  transition:all 0.15s;font-family:inherit;letter-spacing:0.5px;
+}
+.btn-login:hover{opacity:0.88;transform:translateY(-1px)}
+.login-error{font-size:12px;color:var(--danger);text-align:center;min-height:16px}
+
+/* ── APP ── */
+#screen-app{width:100%;display:none;flex-direction:row}
+
+/* ── SIDEBAR ── */
+.sa-sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.sa-logo-wrap{
+  padding:18px 16px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.sa-logo-img{width:38px;height:38px;border-radius:10px;object-fit:cover;box-shadow:0 0 16px rgba(0,194,255,0.2);flex-shrink:0}
+.sa-logo-text{display:flex;flex-direction:column}
+.sa-logo{font-size:14px;font-weight:900;color:#fff;letter-spacing:-0.3px}
+.sa-logo-sub{font-size:9px;font-weight:600;color:var(--muted);margin-top:1px;letter-spacing:0.5px}
+.sa-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.sa-nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);
+  border-radius:var(--radius-sm);transition:all 0.15s;position:relative;
+}
+.sa-nav-item:hover{background:rgba(0,194,255,0.07);color:var(--text)}
+.sa-nav-item.active{
+  background:rgba(0,194,255,0.1);color:var(--accent);
+  border:1px solid rgba(0,194,255,0.18);
+}
+.sa-nav-item.active::before{
+  content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+  width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
+  box-shadow:0 0 8px var(--accent);
+}
+.sa-badge{
+  margin-left:auto;background:var(--danger);color:#fff;
+  font-size:9px;font-weight:800;padding:2px 6px;
+  border-radius:8px;display:none;min-width:18px;text-align:center;
+}
+.sa-badge.show{display:block}
+.sa-sidebar-footer{
+  padding:10px 8px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:8px;
+}
+.sa-user-card{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;background:var(--card);border-radius:var(--radius-sm);
+}
+.sa-user-avatar{
+  width:28px;height:28px;background:rgba(0,194,255,0.1);
+  border:1px solid rgba(0,194,255,0.2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;
+}
+.sa-user-email{font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-user-role{font-size:9px;color:var(--accent);font-weight:600;margin-top:1px}
+.sa-logout{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.18);
+  border-radius:var(--radius-sm);color:var(--danger);font-size:12px;font-weight:600;
+  cursor:pointer;padding:9px 12px;width:100%;font-family:inherit;transition:background 0.15s;
+}
+.sa-logout:hover{background:rgba(239,68,68,0.13)}
+
+/* ── TOPBAR ── */
+.sa-topbar{
+  height:58px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:sticky;top:0;z-index:50;flex-shrink:0;
+}
+.sa-topbar-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.3px}
+.sa-topbar-badge{
+  font-size:12px;font-weight:700;color:var(--accent);
+  background:rgba(0,194,255,0.1);border:1px solid rgba(0,194,255,0.2);
+  border-radius:20px;padding:4px 14px;
+}
+
+/* ── MAIN ── */
+.sa-main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.sa-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.sa-section-title{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-0.3px;margin-bottom:2px}
+
+/* ── STATS ── */
+.sa-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sa-stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-left:4px solid var(--stat-color,var(--accent));
+  border-radius:var(--radius);padding:16px 18px;
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.sa-stat:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+.sa-stat-val{font-size:26px;font-weight:900;color:var(--stat-color,var(--accent));letter-spacing:-0.5px}
+.sa-stat-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px}
+
+/* ── ALERT BANNER ── */
+.sa-alert-banner{
+  background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);
+  border-radius:var(--radius);padding:14px 18px;
+}
+.sa-alert-title{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
+.sa-alert-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;
+  transition:background 0.1s;border-radius:4px;
+}
+.sa-alert-row:last-child{border-bottom:none}
+.sa-alert-row:hover .sa-alert-nom{color:var(--accent)}
+.sa-alert-nom{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.sa-alert-date{font-size:11px;font-weight:700;color:var(--warning)}
+.sa-alert-date.expired{color:var(--danger)}
+
+/* ── TABLE ── */
+.sa-table-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.sa-table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:1px solid var(--border);
+}
+.sa-table-header h3{font-size:13px;font-weight:700;color:var(--text)}
+.sa-table-header-right{display:flex;gap:8px;align-items:center}
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(255,255,255,0.02)}
+th{
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  color:var(--muted);padding:10px 14px;text-align:left;
+  border-bottom:1px solid var(--border);text-transform:uppercase;
+}
+td{
+  padding:12px 14px;font-size:12px;
+  border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;
+}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(0,194,255,0.03)}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;
+}
+.badge-green {background:rgba(34,197,94,0.1);color:var(--success);border:1px solid rgba(34,197,94,0.2)}
+.badge-red   {background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
+.badge-orange{background:rgba(245,158,11,0.1);color:var(--warning);border:1px solid rgba(245,158,11,0.2)}
+.badge-yellow{background:rgba(234,179,8,0.08);color:#EAB308;border:1px solid rgba(234,179,8,0.2)}
+.badge-blue  {background:rgba(0,194,255,0.1);color:var(--accent);border:1px solid rgba(0,194,255,0.2)}
+
+/* ── BOUTONS ── */
+.btn{
+  padding:7px 14px;border-radius:var(--radius-sm);border:none;
+  font-size:12px;font-weight:700;cursor:pointer;
+  transition:all 0.15s;font-family:inherit;
+}
+.btn:hover{opacity:0.85}
+.btn-primary{background:var(--accent);color:#09111B}
+.btn-danger {background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.25)}
+.btn-danger:hover{background:rgba(239,68,68,0.18)}
+.btn-success{background:rgba(34,197,94,0.1);color:var(--success);border:1px solid rgba(34,197,94,0.25)}
+.btn-success:hover{background:rgba(34,197,94,0.18)}
+.btn-ghost  {background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.15)}
+.btn-sm     {padding:4px 10px;font-size:11px}
+
+/* ── MODAL ── */
+.sa-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  display:none;align-items:center;justify-content:center;z-index:9000;
+  backdrop-filter:blur(4px);
+}
+.sa-modal-overlay.open{display:flex}
+.sa-modal{
+  background:var(--surface);border:1px solid rgba(0,194,255,0.15);
+  border-radius:18px;padding:28px;width:500px;max-width:95vw;
+  max-height:90vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:18px;
+  box-shadow:0 24px 60px rgba(0,0,0,0.5);
+}
+.sa-modal h2{font-size:16px;font-weight:800;color:var(--text)}
+.sa-modal-close{margin-left:auto;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px}
+.sa-modal-close:hover{color:var(--text)}
+.sa-modal-header{display:flex;align-items:center}
+.sa-field{display:flex;flex-direction:column;gap:6px}
+.sa-field label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.sa-field input,.sa-field textarea,.sa-field select{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);
+  font-size:13px;outline:none;font-family:inherit;transition:border-color 0.2s;
+}
+.sa-field input:focus,.sa-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,255,0.07)}
+.sa-field-row{display:flex;gap:12px}
+.sa-field-row .sa-field{flex:1}
+.sa-section-sep{
+  font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;
+  padding:4px 0;border-bottom:1px solid var(--border);text-transform:uppercase;
+}
+.sa-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.sa-error{font-size:12px;color:var(--danger);text-align:center;min-height:16px}
+
+/* ── TOAST ── */
+.sa-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--card);color:var(--text);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 20px;font-size:13px;font-weight:600;
+  z-index:9999;transition:opacity 0.3s;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ── LOADING ── */
+.sa-loading{
+  text-align:center;padding:60px;color:var(--muted);font-size:14px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.sa-loading::before{
+  content:'';width:16px;height:16px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin 0.7s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{
+  background:var(--surface);border:1px solid rgba(0,194,255,0.2);
+  border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:12px;
+}
+.detail-section-title{
+  font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);
+  text-transform:uppercase;margin-bottom:4px;
+}
+.detail-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;
+}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:var(--muted)}
+.detail-val{font-weight:600;color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- ════ ÉCRAN LOGIN ════ -->
+<div id="screen-login">
+  <div class="login-box">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">MémoTruck</div>
+    <div class="login-sub">SUPERADMIN</div>
+    <div class="sa-field">
+      <label>EMAIL</label>
+      <input type="email" id="login-email" placeholder="superadmin@memotruck.fr" autocomplete="email" />
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn-login" id="btn-login">Se connecter</button>
+  </div>
+</div>
+
+<!-- ════ ÉCRAN APP ════ -->
+<div id="screen-app">
+
+  <!-- SIDEBAR -->
+  <div class="sa-sidebar">
+    <div class="sa-logo">🚚 MémoTruck</div>
+    <div class="sa-logo-sub">SUPERADMIN</div>
+
+    <div class="sa-nav-item active" data-section="dashboard">📊 Dashboard</div>
+    <div class="sa-nav-item" data-section="entreprises">
+      🏢 Entreprises
+      <span class="sa-badge" id="badge-entreprises">0</span>
+    </div>
+    <div class="sa-nav-item" data-section="contrats">
+      📋 Contrats
+      <span class="sa-badge" id="badge-contrats">0</span>
+    </div>
+
+    <div class="sa-sidebar-footer">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;" id="sa-user-email"></div>
+      <button class="sa-logout" id="btn-logout">🚪 Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="sa-main" id="sa-main">
+    <div class="sa-loading">Chargement…</div>
+  </div>
+</div>
+
+<!-- ════ MODAL ENTREPRISE ════ -->
+<div class="sa-modal-overlay" id="modal-entreprise">
+  <div class="sa-modal">
+    <div class="sa-modal-header">
+      <h2 id="modal-entreprise-title">Nouvelle entreprise</h2>
+      <button class="sa-modal-close" id="modal-entreprise-close">✕</button>
+    </div>
+
+    <div class="sa-section-sep">INFORMATIONS ENTREPRISE</div>
+    <div class="sa-field">
+      <label>NOM DE L'ENTREPRISE *</label>
+      <input type="text" id="modal-nom" placeholder="Transport Dupont" />
+    </div>
+    <div class="sa-field">
+      <label>PACK / ABONNEMENT *</label>
+      <select id="modal-pack" style="width:100%;height:44px;background:var(--sa-input-bg);border:1.5px solid var(--sa-border);border-radius:10px;padding:0 14px;color:var(--sa-text);font-size:14px;font-weight:600;">
+        <option value="starter">⭐ Starter — jusqu'à 5 véhicules — 79€/mois</option>
+        <option value="pme">🏢 PME — jusqu'à 15 véhicules — 129€/mois</option>
+        <option value="pro">🚀 Pro — jusqu'à 35 véhicules — 219€/mois</option>
+        <option value="entreprise">🏭 Entreprise — illimité — Sur devis</option>
+      </select>
+    </div>
+    <div class="sa-field-row">
+      <div class="sa-field">
+        <label>DÉBUT CONTRAT</label>
+        <input type="date" id="modal-debut" />
+      </div>
+      <div class="sa-field">
+        <label>FIN CONTRAT</label>
+        <input type="date" id="modal-fin" />
+      </div>
+    </div>
+    <div class="sa-field-row">
+      <div class="sa-field">
+        <label>NOM CONTACT</label>
+        <input type="text" id="modal-contact-nom" placeholder="Jean Dupont" />
+      </div>
+      <div class="sa-field">
+        <label>TÉLÉPHONE</label>
+        <input type="text" id="modal-contact-tel" placeholder="06 XX XX XX XX" />
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL CONTACT</label>
+      <input type="email" id="modal-contact-email" placeholder="contact@transport.fr" />
+    </div>
+    <div class="sa-field">
+      <label>NOTES</label>
+      <textarea id="modal-notes" rows="2" placeholder="Notes internes…"></textarea>
+    </div>
+
+    <div class="sa-section-sep" id="modal-admin-section">COMPTE ADMIN (Chef de parc)</div>
+    <div id="modal-admin-fields">
+      <div class="sa-field-row" style="margin-bottom:12px;">
+        <div class="sa-field">
+          <label>PRÉNOM</label>
+          <input type="text" id="modal-admin-prenom" placeholder="Marie" />
+        </div>
+        <div class="sa-field">
+          <label>NOM</label>
+          <input type="text" id="modal-admin-nom" placeholder="Martin" />
+        </div>
+      </div>
+      <div class="sa-field" style="margin-bottom:12px;">
+        <label>EMAIL ADMIN *</label>
+        <input type="email" id="modal-admin-email" placeholder="chef@transport.fr" />
+      </div>
+      <div class="sa-field">
+        <label>MOT DE PASSE TEMPORAIRE *</label>
+        <input type="text" id="modal-admin-password" placeholder="Mot de passe à communiquer au client" />
+      </div>
+    </div>
+
+    <div class="sa-error" id="modal-entreprise-error"></div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="modal-entreprise-cancel">Annuler</button>
+      <button class="btn btn-primary" id="modal-entreprise-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL ADMIN SUPPLÉMENTAIRE ════ -->
+<div class="sa-modal-overlay" id="modal-admin">
+  <div class="sa-modal">
+    <div class="sa-modal-header">
+      <h2>Ajouter un admin</h2>
+      <button class="sa-modal-close" id="modal-admin-close">✕</button>
+    </div>
+    <div class="sa-field-row">
+      <div class="sa-field">
+        <label>PRÉNOM</label>
+        <input type="text" id="modal-admin2-prenom" />
+      </div>
+      <div class="sa-field">
+        <label>NOM</label>
+        <input type="text" id="modal-admin2-nom" />
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL *</label>
+      <input type="email" id="modal-admin2-email" />
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE *</label>
+      <input type="text" id="modal-admin2-password" />
+    </div>
+    <div class="sa-error" id="modal-admin-error"></div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="modal-admin-cancel">Annuler</button>
+      <button class="btn btn-primary" id="modal-admin-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<div class="sa-toast" id="sa-toast" style="opacity:0;"></div>
+
+<!-- ════ MODALE SUPPRESSION ENTREPRISE ════ -->
+<div class="sa-modal-overlay" id="modal-delete">
+  <div class="sa-modal" style="border:1px solid var(--danger);">
+    <div class="sa-modal-header">
+      <h2 style="color:var(--danger);">⚠️ Supprimer l'entreprise</h2>
+      <button class="sa-modal-close" id="modal-delete-close">✕</button>
+    </div>
+    <div style="background:rgba(239,83,80,0.08);border:1px solid rgba(239,83,80,0.2);border-radius:10px;padding:14px;font-size:13px;line-height:1.6;color:#e8eaf0;">
+      Cette action est <strong>irréversible</strong>. Elle supprimera définitivement :<br/>
+      • Tous les chauffeurs et leurs comptes<br/>
+      • Tous les véhicules (tracteurs + remorques)<br/>
+      • Toutes les photos et documents<br/>
+      • Tous les admins (chefs de parc)<br/>
+      • Tout l'historique (interventions, consommations)
+    </div>
+    <div class="sa-field">
+      <label>ÉTAPE 1 — Tapez <strong id="modal-delete-nom-ref" style="color:var(--danger);"></strong> pour confirmer</label>
+      <input type="text" id="modal-delete-confirm1" placeholder="Nom de l'entreprise" autocomplete="off" />
+    </div>
+    <div class="sa-field">
+      <label>ÉTAPE 2 — Tapez <strong style="color:var(--danger);">SUPPRIMER DÉFINITIVEMENT</strong></label>
+      <input type="text" id="modal-delete-confirm2" placeholder="SUPPRIMER DÉFINITIVEMENT" autocomplete="off" />
+    </div>
+    <div class="sa-error" id="modal-delete-error"></div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="modal-delete-cancel">Annuler</button>
+      <button class="btn btn-danger" id="modal-delete-save" disabled style="opacity:0.4;">🗑️ Supprimer tout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ztlxxrywxxflqvigwncb.supabase.co";
+const STORAGE_KEY  = "memotruck_superadmin_session";
+
+// ─── Session ────────────────────────────────────────────────────────────
+let session = null;
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
+}
+function saveSession(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); session = s; }
+function clearSession()  { localStorage.removeItem(STORAGE_KEY); session = null; }
+
+// ─── API calls ──────────────────────────────────────────────────────────
+async function callEdge(fnName, body, jwt = null) {
+  const headers = { "Content-Type": "application/json" };
+  if (jwt) headers["Authorization"] = `Bearer ${jwt}`;
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
+    method: "POST", headers, body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+  return data;
+}
+
+async function api(action, body = {}) {
+  return callEdge("superadmin-api", { action, ...body }, session.jwt);
+}
+
+// ─── Toast ──────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById("sa-toast");
+  el.textContent = msg; el.style.opacity = "1";
+  setTimeout(() => { el.style.opacity = "0"; }, 2500);
+}
+
+// ─── Utils ──────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function formatDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric" });
+}
+function daysDiff(iso) {
+  if (!iso) return null;
+  return Math.floor((new Date(iso) - Date.now()) / 86400000);
+}
+function packBadge(pack) {
+  const packs = {
+    starter:    { label: "Starter",    color: "badge-blue",  max: "5"  },
+    pme:        { label: "PME",        color: "badge-green", max: "15" },
+    pro:        { label: "Pro",        color: "badge-blue",  max: "35" },
+    entreprise: { label: "Entreprise", color: "badge-green", max: "∞"  },
+  };
+  const p = packs[pack] || { label: pack || "—", color: "badge-blue", max: "?" };
+  return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${p.max})</span></span>`;
+}
+
+function contratBadge(iso) {
+  if (!iso) return `<span class="badge badge-blue">Sans limite</span>`;
+  const diff = daysDiff(iso);
+  if (diff < 0)  return `<span class="badge badge-red">⚠️ Expiré ${Math.abs(diff)}j</span>`;
+  if (diff < 15) return `<span class="badge badge-red">🔴 ${diff}j</span>`;
+  if (diff < 30) return `<span class="badge badge-orange">🟠 ${diff}j</span>`;
+  if (diff < 60) return `<span class="badge badge-yellow">🟡 ${diff}j</span>`;
+  return `<span style="font-size:12px;color:#8892a4;">${formatDate(iso)}</span>`;
+}
+
+// ─── Navigation ─────────────────────────────────────────────────────────
+let currentSection = "dashboard";
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats" };
+function navigateTo(section) {
+  currentSection = section;
+  document.querySelectorAll(".sa-nav-item").forEach(el => {
+    el.classList.toggle("active", el.dataset.section === section);
+  });
+  const t = document.getElementById("sa-topbar-title");
+  if (t) t.textContent = _saTitles[section] || section;
+  render();
+}
+
+function render() {
+  const main = document.getElementById("sa-main");
+  main.innerHTML = `<div class="sa-loading">Chargement…</div>`;
+  if (currentSection === "dashboard")   renderDashboard();
+  if (currentSection === "entreprises") renderEntreprises();
+  if (currentSection === "contrats")    renderContrats();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { nbEntreprises, nbActives, nbSuspendues, nbChauf, nbTract, nbRemor, contratsAlerte } = await api("list_stats");
+
+    // Met à jour le badge contrats
+    const badgeC = document.getElementById("badge-contrats");
+    if (contratsAlerte.length > 0) {
+      badgeC.textContent = contratsAlerte.length; badgeC.classList.add("show");
+    } else { badgeC.classList.remove("show"); }
+
+    const alertHTML = contratsAlerte.length > 0 ? `
+      <div class="sa-alert-banner">
+        <div class="sa-alert-title">⚠️ ${contratsAlerte.length} contrat(s) expirant bientôt</div>
+        ${contratsAlerte.map(e => {
+          const diff = daysDiff(e.date_fin_contrat);
+          return `<div class="sa-alert-row" onclick="navigateTo('contrats')">
+            <span class="sa-alert-nom">${esc(e.nom)}</span>
+            <span class="sa-alert-date ${diff < 0 ? 'expired' : ''}">${diff < 0 ? 'Expiré ' + Math.abs(diff) + 'j' : 'Dans ' + diff + ' j'}</span>
+          </div>`;
+        }).join("")}
+      </div>` : "";
+
+    main.innerHTML = `
+      <div class="sa-section-title">Dashboard</div>
+      ${alertHTML}
+      <div class="sa-stats">
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--accent);">${nbEntreprises}</div>
+          <div class="sa-stat-lbl">ENTREPRISES TOTALES</div>
+        </div>
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--success);">${nbActives}</div>
+          <div class="sa-stat-lbl">ACTIVES</div>
+        </div>
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--danger);">${nbSuspendues}</div>
+          <div class="sa-stat-lbl">SUSPENDUES</div>
+        </div>
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--text);">${nbChauf}</div>
+          <div class="sa-stat-lbl">CHAUFFEURS</div>
+        </div>
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--text);">${nbTract}</div>
+          <div class="sa-stat-lbl">TRACTEURS</div>
+        </div>
+        <div class="sa-stat">
+          <div class="sa-stat-val" style="color:var(--text);">${nbRemor}</div>
+          <div class="sa-stat-lbl">REMORQUES</div>
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ENTREPRISES
+// ═══════════════════════════════════════════════════════════════════════
+let _entreprises = [];
+
+async function renderEntreprises() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { entreprises } = await api("list_entreprises");
+    _entreprises = entreprises;
+
+    const suspended = entreprises.filter(e => !e.est_active).length;
+    const badge = document.getElementById("badge-entreprises");
+    if (suspended > 0) { badge.textContent = suspended; badge.classList.add("show"); }
+    else badge.classList.remove("show");
+
+    main.innerHTML = `
+      <div class="sa-section-title">Entreprises (${entreprises.length})</div>
+      <div class="sa-table-wrap">
+        <div class="sa-table-header">
+          <h3>Toutes les entreprises</h3>
+          <div class="sa-table-header-right">
+            <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ENTREPRISE</th><th>CODE</th><th>PACK</th><th>STATUT</th>
+              <th>FIN CONTRAT</th><th>CHAUFFEURS</th><th>TRACTEURS</th>
+              <th>ADMINS</th><th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${entreprises.map(e => `
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--text);">${esc(e.nom)}</div>
+                  ${e.contact_nom ? `<div style="font-size:11px;color:var(--muted);">${esc(e.contact_nom)}</div>` : ""}
+                </td>
+                <td><span class="badge badge-blue">${esc(e.code_entreprise)}</span></td>
+                <td>${packBadge(e.pack)}</td>
+                <td>
+                  ${e.est_active
+                    ? `<span class="badge badge-green">✓ Active</span>`
+                    : `<span class="badge badge-red">⛔ Suspendue</span>`}</td>
+                <td>${contratBadge(e.date_fin_contrat)}</td>
+                <td style="text-align:center;">${e.chauffeurs}</td>
+                <td style="text-align:center;">${e.tracteurs}</td>
+                <td style="text-align:center;">${e.admins}</td>
+                <td>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" data-detail="${e.id}">👁️</button>
+                    <button class="btn btn-ghost btn-sm" data-edit="${e.id}">✏️</button>
+                    ${e.est_active
+                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+                    <button class="btn btn-sm" data-delete="${e.id}" data-nom="${e.nom}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div id="detail-zone"></div>
+    `;
+
+    document.getElementById("btn-new-entreprise").addEventListener("click", () => ouvrirModalEntreprise(null));
+
+    // Détail
+    document.querySelectorAll("[data-detail]").forEach(btn => {
+      btn.addEventListener("click", () => afficherDetailEntreprise(btn.dataset.detail));
+    });
+    // Édition
+    document.querySelectorAll("[data-edit]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const e = _entreprises.find(x => x.id === btn.dataset.edit);
+        if (e) ouvrirModalEntreprise(e);
+      });
+    });
+    // Toggle
+    document.querySelectorAll("[data-toggle]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const active = btn.dataset.active === "true";
+        const e = _entreprises.find(x => x.id === btn.dataset.toggle);
+        if (!e) return;
+        const label = active ? "réactiver" : "suspendre";
+        if (!confirm(`Voulez-vous ${label} "${e.nom}" ?\n${!active ? "Les chauffeurs et admins ne pourront plus se connecter." : ""}`)) return;
+        try {
+          await api("toggle_entreprise", { entreprise_id: btn.dataset.toggle, est_active: active });
+          toast(active ? "✅ Entreprise réactivée" : "⛔ Entreprise suspendue");
+          renderEntreprises();
+        } catch (err) { toast("❌ " + err.message); }
+      });
+    });
+
+    // Suppression
+    document.querySelectorAll("[data-delete]").forEach(btn => {
+      btn.addEventListener("click", () => ouvrirModalSuppression(btn.dataset.delete, btn.dataset.nom));
+    });
+
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
+
+async function afficherDetailEntreprise(id) {
+  const e = _entreprises.find(x => x.id === id);
+  if (!e) return;
+  const zone = document.getElementById("detail-zone");
+  zone.innerHTML = `<div class="sa-loading">Chargement admins…</div>`;
+
+  try {
+    const { admins } = await api("list_admins", { entreprise_id: id });
+    zone.innerHTML = `
+      <div class="detail-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:14px;font-weight:800;">${esc(e.nom)}</div>
+          <span class="badge badge-blue">${esc(e.code_entreprise)}</span>
+        </div>
+
+        <div>
+          <div class="detail-section-title">CONTRAT</div>
+          <div class="detail-row"><span class="detail-label">Pack</span><span class="detail-val">${packBadge(e.pack)}</span></div>
+          <div class="detail-row"><span class="detail-label">Début</span><span class="detail-val">${formatDate(e.date_debut_contrat)}</span></div>
+          <div class="detail-row"><span class="detail-label">Fin</span><span class="detail-val">${contratBadge(e.date_fin_contrat)}</span></div>
+        </div>
+
+        <div>
+          <div class="detail-section-title">CONTACT</div>
+          <div class="detail-row"><span class="detail-label">Nom</span><span class="detail-val">${esc(e.contact_nom) || "—"}</span></div>
+          <div class="detail-row"><span class="detail-label">Email</span><span class="detail-val">${esc(e.contact_email) || "—"}</span></div>
+          <div class="detail-row"><span class="detail-label">Tél</span><span class="detail-val">${esc(e.contact_telephone) || "—"}</span></div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div class="detail-section-title" style="margin:0;">ADMINS (${admins.length})</div>
+            <button class="btn btn-primary btn-sm" id="btn-add-admin" data-entreprise="${id}">+ Admin</button>
+          </div>
+          ${admins.map(a => `
+            <div class="detail-row">
+              <span class="detail-label">${esc(a.prenom)} ${esc(a.nom)}</span>
+              <span class="detail-val" style="font-size:11px;">${esc(a.email)}</span>
+            </div>
+          `).join("") || `<div style="font-size:12px;color:var(--muted);">Aucun admin</div>`}
+        </div>
+
+        ${e.notes ? `<div><div class="detail-section-title">NOTES</div><div style="font-size:12px;color:var(--muted);">${esc(e.notes)}</div></div>` : ""}
+      </div>
+    `;
+
+    document.getElementById("btn-add-admin")?.addEventListener("click", (ev) => {
+      ouvrirModalAdmin(ev.currentTarget.dataset.entreprise);
+    });
+
+  } catch (err) {
+    zone.innerHTML = `<div style="color:var(--danger);">❌ ${err.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CONTRATS
+// ═══════════════════════════════════════════════════════════════════════
+async function renderContrats() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { entreprises } = await api("list_entreprises");
+    const sorted = [...entreprises].sort((a, b) => {
+      if (!a.date_fin_contrat) return 1;
+      if (!b.date_fin_contrat) return -1;
+      return new Date(a.date_fin_contrat) - new Date(b.date_fin_contrat);
+    });
+
+    const enAlerte = sorted.filter(e => {
+      if (!e.date_fin_contrat) return false;
+      return daysDiff(e.date_fin_contrat) < 30;
+    });
+
+    const badgeC = document.getElementById("badge-contrats");
+    if (enAlerte.length > 0) { badgeC.textContent = enAlerte.length; badgeC.classList.add("show"); }
+    else badgeC.classList.remove("show");
+
+    main.innerHTML = `
+      <div class="sa-section-title">Suivi des contrats</div>
+      <div class="sa-table-wrap">
+        <div class="sa-table-header"><h3>Tous les contrats</h3></div>
+        <table>
+          <thead>
+            <tr><th>ENTREPRISE</th><th>STATUT</th><th>DÉBUT</th><th>FIN CONTRAT</th><th>ALERTE</th><th>ACTIONS</th></tr>
+          </thead>
+          <tbody>
+            ${sorted.map(e => {
+              const diff = daysDiff(e.date_fin_contrat);
+              let alerteHTML = `<span style="color:var(--muted);font-size:11px;">OK</span>`;
+              if (diff !== null && diff < 0)  alerteHTML = `<span class="badge badge-red">⚠️ Expiré depuis ${Math.abs(diff)}j</span>`;
+              else if (diff !== null && diff < 15) alerteHTML = `<span class="badge badge-red">🔴 Dans ${diff}j</span>`;
+              else if (diff !== null && diff < 30) alerteHTML = `<span class="badge badge-orange">🟠 Dans ${diff}j</span>`;
+              else if (diff !== null && diff < 60) alerteHTML = `<span class="badge badge-yellow">🟡 Dans ${diff}j</span>`;
+              return `<tr>
+                <td><strong>${esc(e.nom)}</strong></td>
+                <td>${e.est_active ? `<span class="badge badge-green">Active</span>` : `<span class="badge badge-red">Suspendue</span>`}</td>
+                <td>${formatDate(e.date_debut_contrat)}</td>
+                <td>${formatDate(e.date_fin_contrat)}</td>
+                <td>${alerteHTML}</td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-ghost btn-sm" data-edit-contrat="${e.id}">✏️ Modifier</button>
+                    ${e.est_active
+                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+                  </div>
+                </td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.querySelectorAll("[data-edit-contrat]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const e = sorted.find(x => x.id === btn.dataset.editContrat);
+        if (e) ouvrirModalEntreprise(e);
+      });
+    });
+    document.querySelectorAll("[data-toggle]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const active = btn.dataset.active === "true";
+        const e = sorted.find(x => x.id === btn.dataset.toggle);
+        if (!e || !confirm(`${active ? "Réactiver" : "Suspendre"} "${e.nom}" ?`)) return;
+        try {
+          await api("toggle_entreprise", { entreprise_id: btn.dataset.toggle, est_active: active });
+          toast(active ? "✅ Réactivée" : "⛔ Suspendue");
+          renderContrats();
+        } catch (err) { toast("❌ " + err.message); }
+      });
+    });
+
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODAL ENTREPRISE (création + édition)
+// ═══════════════════════════════════════════════════════════════════════
+let _editingEntrepriseId = null;
+
+function ouvrirModalEntreprise(entreprise) {
+  _editingEntrepriseId = entreprise?.id || null;
+  const isEdit = !!entreprise;
+
+  document.getElementById("modal-entreprise-title").textContent = isEdit ? "Modifier l'entreprise" : "Nouvelle entreprise";
+  document.getElementById("modal-entreprise-save").textContent  = isEdit ? "✓ Enregistrer" : "✓ Créer";
+  document.getElementById("modal-admin-section").style.display  = isEdit ? "none" : "block";
+  document.getElementById("modal-admin-fields").style.display   = isEdit ? "none" : "flex";
+  document.getElementById("modal-admin-fields").style.flexDirection = "column";
+  document.getElementById("modal-admin-fields").style.gap = "12px";
+
+  document.getElementById("modal-nom").value            = entreprise?.nom || "";
+  document.getElementById("modal-pack").value           = entreprise?.pack || "starter";
+  document.getElementById("modal-debut").value          = entreprise?.date_debut_contrat || "";
+  document.getElementById("modal-fin").value            = entreprise?.date_fin_contrat || "";
+  document.getElementById("modal-contact-nom").value    = entreprise?.contact_nom || "";
+  document.getElementById("modal-contact-email").value  = entreprise?.contact_email || "";
+  document.getElementById("modal-contact-tel").value    = entreprise?.contact_telephone || "";
+  document.getElementById("modal-notes").value          = entreprise?.notes || "";
+  document.getElementById("modal-admin-prenom").value   = "";
+  document.getElementById("modal-admin-nom").value      = "";
+  document.getElementById("modal-admin-email").value    = "";
+  document.getElementById("modal-admin-password").value = "";
+  document.getElementById("modal-entreprise-error").textContent = "";
+
+  document.getElementById("modal-entreprise").classList.add("open");
+}
+
+document.getElementById("modal-entreprise-close").addEventListener("click",  () => document.getElementById("modal-entreprise").classList.remove("open"));
+document.getElementById("modal-entreprise-cancel").addEventListener("click", () => document.getElementById("modal-entreprise").classList.remove("open"));
+
+document.getElementById("modal-entreprise-save").addEventListener("click", async () => {
+  const errEl = document.getElementById("modal-entreprise-error");
+  errEl.textContent = "";
+  const btn = document.getElementById("modal-entreprise-save");
+  btn.disabled = true; btn.textContent = "…";
+
+  const payload = {
+    nom:                 document.getElementById("modal-nom").value.trim(),
+    pack:                document.getElementById("modal-pack").value,
+    date_debut_contrat:  document.getElementById("modal-debut").value || null,
+    date_fin_contrat:    document.getElementById("modal-fin").value || null,
+    contact_nom:         document.getElementById("modal-contact-nom").value.trim() || null,
+    contact_email:       document.getElementById("modal-contact-email").value.trim() || null,
+    contact_telephone:   document.getElementById("modal-contact-tel").value.trim() || null,
+    notes:               document.getElementById("modal-notes").value.trim() || null,
+  };
+
+  try {
+    if (_editingEntrepriseId) {
+      await api("update_entreprise", { entreprise_id: _editingEntrepriseId, ...payload });
+      toast("✅ Entreprise mise à jour");
+    } else {
+      payload.admin_prenom   = document.getElementById("modal-admin-prenom").value.trim();
+      payload.admin_nom      = document.getElementById("modal-admin-nom").value.trim();
+      payload.admin_email    = document.getElementById("modal-admin-email").value.trim();
+      payload.admin_password = document.getElementById("modal-admin-password").value;
+      const res = await api("create_entreprise", payload);
+      toast(`✅ Entreprise créée — Code : ${res.code_entreprise}`);
+    }
+    document.getElementById("modal-entreprise").classList.remove("open");
+    render();
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = _editingEntrepriseId ? "✓ Enregistrer" : "✓ Créer";
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODAL ADMIN SUPPLÉMENTAIRE
+// ═══════════════════════════════════════════════════════════════════════
+let _adminEntrepriseId = null;
+
+function ouvrirModalAdmin(entrepriseId) {
+  _adminEntrepriseId = entrepriseId;
+  document.getElementById("modal-admin2-prenom").value   = "";
+  document.getElementById("modal-admin2-nom").value      = "";
+  document.getElementById("modal-admin2-email").value    = "";
+  document.getElementById("modal-admin2-password").value = "";
+  document.getElementById("modal-admin-error").textContent = "";
+  document.getElementById("modal-admin").classList.add("open");
+}
+
+document.getElementById("modal-admin-close").addEventListener("click",  () => document.getElementById("modal-admin").classList.remove("open"));
+document.getElementById("modal-admin-cancel").addEventListener("click", () => document.getElementById("modal-admin").classList.remove("open"));
+
+document.getElementById("modal-admin-save").addEventListener("click", async () => {
+  const errEl = document.getElementById("modal-admin-error");
+  const btn   = document.getElementById("modal-admin-save");
+  errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
+  try {
+    await api("create_admin", {
+      entreprise_id: _adminEntrepriseId,
+      prenom:   document.getElementById("modal-admin2-prenom").value.trim(),
+      nom:      document.getElementById("modal-admin2-nom").value.trim(),
+      email:    document.getElementById("modal-admin2-email").value.trim(),
+      password: document.getElementById("modal-admin2-password").value,
+    });
+    toast("✅ Admin créé");
+    document.getElementById("modal-admin").classList.remove("open");
+    if (currentSection === "entreprises") render();
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "✓ Créer";
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// SUPPRESSION ENTREPRISE
+// ═══════════════════════════════════════════════════════════════════════
+let _deleteEntrepriseId  = null;
+let _deleteEntrepriseNom = null;
+
+function ouvrirModalSuppression(id, nom) {
+  _deleteEntrepriseId  = id;
+  _deleteEntrepriseNom = nom;
+  document.getElementById("modal-delete-nom-ref").textContent   = nom;
+  document.getElementById("modal-delete-confirm1").value         = "";
+  document.getElementById("modal-delete-confirm2").value         = "";
+  document.getElementById("modal-delete-error").textContent      = "";
+  document.getElementById("modal-delete-save").disabled          = true;
+  document.getElementById("modal-delete-save").style.opacity     = "0.4";
+  document.getElementById("modal-delete").classList.add("open");
+}
+
+// Valide les deux champs en temps réel pour activer le bouton
+["modal-delete-confirm1", "modal-delete-confirm2"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    const v1 = document.getElementById("modal-delete-confirm1").value.trim();
+    const v2 = document.getElementById("modal-delete-confirm2").value.trim();
+    const ok  = v1 === _deleteEntrepriseNom && v2 === "SUPPRIMER DÉFINITIVEMENT";
+    const btn = document.getElementById("modal-delete-save");
+    btn.disabled     = !ok;
+    btn.style.opacity = ok ? "1" : "0.4";
+  });
+});
+
+document.getElementById("modal-delete-close").addEventListener("click",  () => document.getElementById("modal-delete").classList.remove("open"));
+document.getElementById("modal-delete-cancel").addEventListener("click", () => document.getElementById("modal-delete").classList.remove("open"));
+
+document.getElementById("modal-delete-save").addEventListener("click", async () => {
+  const errEl = document.getElementById("modal-delete-error");
+  const btn   = document.getElementById("modal-delete-save");
+  errEl.textContent = ""; btn.disabled = true; btn.textContent = "Suppression…";
+
+  try {
+    const result = await api("delete_entreprise", { entreprise_id: _deleteEntrepriseId });
+    document.getElementById("modal-delete").classList.remove("open");
+    toast(`✅ Entreprise "${_deleteEntrepriseNom}" supprimée définitivement`);
+    if (result.storageErrors > 0) toast(`⚠️ ${result.storageErrors} fichier(s) Storage non supprimé(s)`);
+    render();
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+    btn.disabled = false; btn.textContent = "🗑️ Supprimer tout";
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════════════════
+document.getElementById("btn-login").addEventListener("click", async () => {
+  const email    = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+  const errEl    = document.getElementById("login-error");
+  const btn      = document.getElementById("btn-login");
+  errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
+
+  try {
+    const data = await callEdge("superadmin-login", { email, password });
+    saveSession(data);
+    document.getElementById("sa-user-email").textContent = data.email;
+    showApp();
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Se connecter";
+  }
+});
+
+document.getElementById("login-password").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("btn-login").click();
+});
+
+// ─── Logout ─────────────────────────────────────────────────────────────
+document.getElementById("btn-logout").addEventListener("click", () => {
+  if (!confirm("Se déconnecter ?")) return;
+  clearSession();
+  document.getElementById("screen-app").style.display  = "none";
+  document.getElementById("screen-login").style.display = "flex";
+});
+
+// ─── Nav ────────────────────────────────────────────────────────────────
+document.querySelectorAll(".sa-nav-item[data-section]").forEach(el => {
+  el.addEventListener("click", () => navigateTo(el.dataset.section));
+});
+
+// ─── Affichage app ──────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById("screen-login").style.display = "none";
+  document.getElementById("screen-app").style.display   = "flex";
+  navigateTo("dashboard");
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────
+const saved = getSession();
+if (saved?.jwt) { session = saved; document.getElementById("sa-user-email").textContent = saved.email || ""; showApp(); }
+</script>
+</body>
+</html>
