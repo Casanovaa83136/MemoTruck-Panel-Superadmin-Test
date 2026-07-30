@@ -251,6 +251,20 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 .sa-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
 .sa-error{font-size:12px;color:var(--danger);text-align:center;min-height:16px}
 
+/* ── PROFILS VÉHICULES (grille de cases à cocher) ── */
+.sa-profils-hint{font-size:11px;color:var(--muted);margin-top:-6px}
+.sa-profils-toolbar{display:flex;justify-content:flex-end;gap:14px}
+.sa-profils-link{font-size:11px;color:var(--accent);cursor:pointer;font-weight:700;background:none;border:none;font-family:inherit;padding:0}
+.sa-profils-link:hover{text-decoration:underline}
+.sa-profils-wrap{display:flex;flex-direction:column;gap:10px}
+.sa-profils-group{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px}
+.sa-profils-group-title{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.sa-profils-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.sa-profils-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);cursor:pointer}
+.sa-profils-item input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.sa-profils-badges{display:flex;flex-wrap:wrap;gap:6px}
+.sa-profils-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(0,194,255,0.08);color:var(--accent);border:1px solid rgba(0,194,255,0.18)}
+
 /* ── TOAST ── */
 .sa-toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -391,6 +405,14 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <label>NOTES</label>
       <textarea id="modal-notes" rows="2" placeholder="Notes internes…"></textarea>
     </div>
+
+    <div class="sa-section-sep">VÉHICULES AUTORISÉS</div>
+    <div class="sa-profils-hint">Types de véhicules que l'entreprise pourra ajouter dans son parc.</div>
+    <div class="sa-profils-toolbar">
+      <button type="button" class="sa-profils-link" id="profils-select-all">Tout cocher</button>
+      <button type="button" class="sa-profils-link" id="profils-select-none">Tout décocher</button>
+    </div>
+    <div class="sa-profils-wrap" id="modal-profils-grid"></div>
 
     <div class="sa-section-sep" id="modal-admin-section">COMPTE ADMIN (Chef de parc)</div>
     <div id="modal-admin-fields">
@@ -547,6 +569,70 @@ function packBadge(pack) {
   const p = packs[pack] || { label: pack || "—", color: "badge-blue", max: "?" };
   return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${p.max})</span></span>`;
 }
+
+// ─── Profils véhicules autorisés ────────────────────────────────────────
+// Doit rester synchro avec PROFILS_MOTEUR / PROFILS_REMORQUE / PROFILS_ENGINS
+// dans memotruck-app-dev/js/utils.js (source de vérité côté appli chauffeur).
+const VEHICLE_PROFILE_GROUPS = [
+  { title: "Tracteurs & porteurs", items: [
+    { id: "tracteur_4x2",      label: "Tracteur 4x2" },
+    { id: "tracteur_6x2",      label: "Tracteur 6x2" },
+    { id: "tracteur_6x4",      label: "Tracteur 6x4" },
+    { id: "tracteur_agricole", label: "Tracteur agricole" },
+    { id: "porteur_19t",       label: "Porteur 19t" },
+    { id: "porteur_26t",       label: "Porteur 26t" },
+    { id: "porteur_32t",       label: "Porteur 32t" },
+    { id: "porteur_32t_8x4",   label: "Porteur 32t 8x4" },
+  ]},
+  { title: "Véhicules légers", items: [
+    { id: "voiture_societe", label: "Voiture de société" },
+    { id: "utilitaire",      label: "Utilitaire / Fourgon" },
+  ]},
+  { title: "Remorques", items: [
+    { id: "remorque_1e",   label: "Remorque 1 essieu" },
+    { id: "remorque_2e",   label: "Remorque 2 essieux" },
+    { id: "remorque_3e",   label: "Remorque 3 essieux" },
+    { id: "porte_char_4e", label: "Porte-char 4 essieux" },
+    { id: "porte_char_5e", label: "Porte-char 5 essieux" },
+    { id: "porte_char_6e", label: "Porte-char 6 essieux" },
+  ]},
+  { title: "Engins de chantier", items: [
+    { id: "pelle_hydraulique",   label: "Pelle hydraulique" },
+    { id: "rouleau_compacteur",  label: "Rouleau compacteur" },
+    { id: "bulldozer_chargeuse", label: "Bulldozer / Chargeuse" },
+    { id: "grue_nacelle",        label: "Grue / Nacelle" },
+    { id: "finisseur",           label: "Finisseur" },
+    { id: "alimentateur",        label: "Alimentateur" },
+    { id: "raboteuse",           label: "Raboteuse" },
+  ]},
+];
+const VEHICLE_PROFILE_LABELS = Object.fromEntries(
+  VEHICLE_PROFILE_GROUPS.flatMap(g => g.items).map(it => [it.id, it.label])
+);
+function profilLabel(id) { return VEHICLE_PROFILE_LABELS[id] || id; }
+
+function renderProfilsGridHTML() {
+  return VEHICLE_PROFILE_GROUPS.map(g => `
+    <div class="sa-profils-group">
+      <div class="sa-profils-group-title">${esc(g.title)}</div>
+      <div class="sa-profils-items">
+        ${g.items.map(it => `
+          <label class="sa-profils-item">
+            <input type="checkbox" class="profil-checkbox" value="${it.id}" />
+            ${esc(it.label)}
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+document.getElementById("modal-profils-grid").innerHTML = renderProfilsGridHTML();
+document.getElementById("profils-select-all").addEventListener("click", () => {
+  document.querySelectorAll(".profil-checkbox").forEach(cb => cb.checked = true);
+});
+document.getElementById("profils-select-none").addEventListener("click", () => {
+  document.querySelectorAll(".profil-checkbox").forEach(cb => cb.checked = false);
+});
 
 function contratBadge(iso) {
   if (!iso) return `<span class="badge badge-blue">Sans limite</span>`;
@@ -777,6 +863,15 @@ async function afficherDetailEntreprise(id) {
         </div>
 
         <div>
+          <div class="detail-section-title">VÉHICULES AUTORISÉS (${(e.profils_autorises||[]).length})</div>
+          <div class="sa-profils-badges">
+            ${(e.profils_autorises||[]).length
+              ? e.profils_autorises.map(id => `<span class="sa-profils-badge">${esc(profilLabel(id))}</span>`).join("")
+              : `<span style="font-size:12px;color:var(--muted);">Aucun — l'entreprise ne peut ajouter aucun véhicule</span>`}
+          </div>
+        </div>
+
+        <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div class="detail-section-title" style="margin:0;">ADMINS (${admins.length})</div>
             <button class="btn btn-primary btn-sm" id="btn-add-admin" data-entreprise="${id}">+ Admin</button>
@@ -909,6 +1004,8 @@ function ouvrirModalEntreprise(entreprise) {
   document.getElementById("modal-contact-email").value  = entreprise?.contact_email || "";
   document.getElementById("modal-contact-tel").value    = entreprise?.contact_telephone || "";
   document.getElementById("modal-notes").value          = entreprise?.notes || "";
+  const autorises = entreprise?.profils_autorises || [];
+  document.querySelectorAll(".profil-checkbox").forEach(cb => { cb.checked = autorises.includes(cb.value); });
   document.getElementById("modal-admin-prenom").value   = "";
   document.getElementById("modal-admin-nom").value      = "";
   document.getElementById("modal-admin-email").value    = "";
@@ -936,6 +1033,7 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
     contact_email:       document.getElementById("modal-contact-email").value.trim() || null,
     contact_telephone:   document.getElementById("modal-contact-tel").value.trim() || null,
     notes:               document.getElementById("modal-notes").value.trim() || null,
+    profils_autorises:   Array.from(document.querySelectorAll(".profil-checkbox:checked")).map(cb => cb.value),
   };
 
   try {
