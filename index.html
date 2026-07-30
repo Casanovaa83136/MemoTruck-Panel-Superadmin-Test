@@ -342,6 +342,7 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       📋 Contrats
       <span class="sa-badge" id="badge-contrats">0</span>
     </div>
+    <div class="sa-nav-item" data-section="journal">🕒 Journal d'activité</div>
 
     <div class="sa-sidebar-footer">
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;" id="sa-user-email"></div>
@@ -432,7 +433,11 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       </div>
       <div class="sa-field">
         <label>MOT DE PASSE TEMPORAIRE *</label>
-        <input type="text" id="modal-admin-password" placeholder="Mot de passe à communiquer au client" />
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="modal-admin-password" placeholder="Mot de passe à communiquer au client" style="flex:1;" />
+          <button type="button" class="btn btn-ghost btn-sm" id="modal-admin-password-gen" title="Générer un mot de passe">🎲</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="modal-admin-password-copy" title="Copier">📋</button>
+        </div>
       </div>
     </div>
 
@@ -467,12 +472,54 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
     </div>
     <div class="sa-field">
       <label>MOT DE PASSE *</label>
-      <input type="text" id="modal-admin2-password" />
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="modal-admin2-password" style="flex:1;" />
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-admin2-password-gen" title="Générer un mot de passe">🎲</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-admin2-password-copy" title="Copier">📋</button>
+      </div>
     </div>
     <div class="sa-error" id="modal-admin-error"></div>
     <div class="sa-modal-actions">
       <button class="btn btn-ghost" id="modal-admin-cancel">Annuler</button>
       <button class="btn btn-primary" id="modal-admin-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODALE IDENTIFIANTS (affichage persistant après création/reset) ════ -->
+<div class="sa-modal-overlay" id="modal-credentials">
+  <div class="sa-modal" style="width:420px;border:1px solid rgba(34,197,94,0.3);">
+    <div class="sa-modal-header">
+      <h2 style="color:var(--success);">✅ Identifiants</h2>
+      <button class="sa-modal-close" id="modal-credentials-close">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+      Notez-les ou copiez-les maintenant — ce mot de passe ne sera plus jamais réaffiché ensuite.
+    </div>
+    <div class="sa-field" id="cred-code-row" style="display:none;">
+      <label>CODE ENTREPRISE</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-code" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-weight:700;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-code">📋</button>
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-email" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-email">📋</button>
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-password" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-weight:700;letter-spacing:0.5px;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-password">📋</button>
+      </div>
+    </div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="cred-copy-all">📋 Copier tout</button>
+      <button class="btn btn-primary" id="modal-credentials-done">J'ai noté, fermer</button>
     </div>
   </div>
 </div>
@@ -554,6 +601,72 @@ function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric" });
+}
+function formatDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+}
+
+// ─── Génération de mot de passe + copie ──────────────────────────────────
+function generatePassword(length = 14) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+  const arr = new Uint32Array(length);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, n => chars[n % chars.length]).join("");
+}
+function copyText(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => toast("📋 Copié")).catch(() => toast("❌ Copie impossible"));
+}
+function attachPasswordGenerator(inputId, genBtnId, copyBtnId) {
+  document.getElementById(genBtnId).addEventListener("click", () => {
+    document.getElementById(inputId).value = generatePassword();
+  });
+  document.getElementById(copyBtnId).addEventListener("click", () => {
+    copyText(document.getElementById(inputId).value);
+  });
+}
+attachPasswordGenerator("modal-admin-password",  "modal-admin-password-gen",  "modal-admin-password-copy");
+attachPasswordGenerator("modal-admin2-password", "modal-admin2-password-gen", "modal-admin2-password-copy");
+
+// ─── Modale identifiants (affichage persistant, ne disparaît pas seul) ───
+function showCredentialsModal({ email, password, code }) {
+  document.getElementById("cred-email").value = email || "";
+  document.getElementById("cred-password").value = password || "";
+  const codeRow = document.getElementById("cred-code-row");
+  if (code) { document.getElementById("cred-code").value = code; codeRow.style.display = "flex"; codeRow.style.flexDirection = "column"; codeRow.style.gap = "6px"; }
+  else { codeRow.style.display = "none"; }
+  document.getElementById("modal-credentials").classList.add("open");
+}
+document.getElementById("modal-credentials-close").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
+document.getElementById("modal-credentials-done").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
+document.getElementById("cred-copy-email").addEventListener("click", () => copyText(document.getElementById("cred-email").value));
+document.getElementById("cred-copy-password").addEventListener("click", () => copyText(document.getElementById("cred-password").value));
+document.getElementById("cred-copy-code").addEventListener("click", () => copyText(document.getElementById("cred-code").value));
+document.getElementById("cred-copy-all").addEventListener("click", () => {
+  const code = document.getElementById("cred-code").value;
+  const lines = [
+    code ? `Code entreprise : ${code}` : null,
+    `Email : ${document.getElementById("cred-email").value}`,
+    `Mot de passe : ${document.getElementById("cred-password").value}`,
+  ].filter(Boolean);
+  copyText(lines.join("\n"));
+});
+
+// ─── Journal d'activité : libellés ────────────────────────────────────────
+const ACTIVITY_LABELS = {
+  create_entreprise:     { icon: "🏢", label: "Entreprise créée",          cls: "badge-green"  },
+  update_entreprise:     { icon: "✏️", label: "Entreprise modifiée",       cls: "badge-blue"   },
+  suspend_entreprise:    { icon: "⛔", label: "Entreprise suspendue",      cls: "badge-red"    },
+  reactivate_entreprise: { icon: "✓",  label: "Entreprise réactivée",      cls: "badge-green"  },
+  delete_entreprise:     { icon: "🗑️", label: "Entreprise supprimée",      cls: "badge-red"    },
+  create_admin:          { icon: "👤", label: "Admin créé",                cls: "badge-blue"   },
+  reset_admin_password:  { icon: "🔑", label: "Mot de passe réinitialisé", cls: "badge-orange" },
+};
+function activityBadge(action) {
+  const a = ACTIVITY_LABELS[action] || { icon: "•", label: action, cls: "badge-blue" };
+  return `<span class="badge ${a.cls}">${a.icon} ${esc(a.label)}</span>`;
 }
 function daysDiff(iso) {
   if (!iso) return null;
@@ -646,7 +759,7 @@ function contratBadge(iso) {
 
 // ─── Navigation ─────────────────────────────────────────────────────────
 let currentSection = "dashboard";
-const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats" };
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité" };
 function navigateTo(section) {
   currentSection = section;
   document.querySelectorAll(".sa-nav-item").forEach(el => {
@@ -663,6 +776,43 @@ function render() {
   if (currentSection === "dashboard")   renderDashboard();
   if (currentSection === "entreprises") renderEntreprises();
   if (currentSection === "contrats")    renderContrats();
+  if (currentSection === "journal")     renderJournal();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// JOURNAL D'ACTIVITÉ
+// ═══════════════════════════════════════════════════════════════════════
+async function renderJournal() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { logs } = await api("list_activity_log", { limit: 150 });
+    main.innerHTML = `
+      <div class="sa-section-title">Journal d'activité</div>
+      <div class="sa-table-wrap">
+        <div class="sa-table-header"><h3>${logs.length} dernière(s) action(s) — superadmin uniquement</h3></div>
+        <table>
+          <thead>
+            <tr><th>DATE</th><th>SUPERADMIN</th><th>ACTION</th><th>ENTREPRISE</th><th>DÉTAILS</th></tr>
+          </thead>
+          <tbody>
+            ${logs.length === 0
+              ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Aucune activité enregistrée pour l'instant</td></tr>`
+              : logs.map(l => `
+                <tr>
+                  <td style="white-space:nowrap;font-size:11px;color:var(--muted);">${formatDateTime(l.created_at)}</td>
+                  <td style="font-size:11px;">${esc(l.superadmin_email)}</td>
+                  <td>${activityBadge(l.action)}</td>
+                  <td>${l.entreprise_nom ? esc(l.entreprise_nom) : "—"}</td>
+                  <td style="font-size:11px;color:var(--muted);">${esc(l.details || "")}</td>
+                </tr>
+              `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -879,7 +1029,10 @@ async function afficherDetailEntreprise(id) {
           ${admins.map(a => `
             <div class="detail-row">
               <span class="detail-label">${esc(a.prenom)} ${esc(a.nom)}</span>
-              <span class="detail-val" style="font-size:11px;">${esc(a.email)}</span>
+              <span class="detail-val" style="font-size:11px;display:flex;align-items:center;gap:8px;">
+                ${esc(a.email)}
+                <button class="btn btn-ghost btn-sm" data-reset-admin="${a.id}" data-reset-email="${esc(a.email)}" title="Réinitialiser le mot de passe">🔑</button>
+              </span>
             </div>
           `).join("") || `<div style="font-size:12px;color:var(--muted);">Aucun admin</div>`}
         </div>
@@ -890,6 +1043,20 @@ async function afficherDetailEntreprise(id) {
 
     document.getElementById("btn-add-admin")?.addEventListener("click", (ev) => {
       ouvrirModalAdmin(ev.currentTarget.dataset.entreprise);
+    });
+
+    zone.querySelectorAll("[data-reset-admin]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const adminId = btn.dataset.resetAdmin;
+        const email   = btn.dataset.resetEmail;
+        if (!confirm(`Générer un nouveau mot de passe pour ${email} ?\nL'ancien ne fonctionnera plus.`)) return;
+        const password = generatePassword();
+        try {
+          await api("reset_admin_password", { admin_id: adminId, password });
+          toast("✅ Mot de passe réinitialisé");
+          showCredentialsModal({ email, password });
+        } catch (err) { toast("❌ " + err.message); }
+      });
     });
 
   } catch (err) {
@@ -1009,7 +1176,7 @@ function ouvrirModalEntreprise(entreprise) {
   document.getElementById("modal-admin-prenom").value   = "";
   document.getElementById("modal-admin-nom").value      = "";
   document.getElementById("modal-admin-email").value    = "";
-  document.getElementById("modal-admin-password").value = "";
+  document.getElementById("modal-admin-password").value = isEdit ? "" : generatePassword();
   document.getElementById("modal-entreprise-error").textContent = "";
 
   document.getElementById("modal-entreprise").classList.add("open");
@@ -1047,6 +1214,10 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
       payload.admin_password = document.getElementById("modal-admin-password").value;
       const res = await api("create_entreprise", payload);
       toast(`✅ Entreprise créée — Code : ${res.code_entreprise}`);
+      document.getElementById("modal-entreprise").classList.remove("open");
+      render();
+      showCredentialsModal({ email: payload.admin_email, password: payload.admin_password, code: res.code_entreprise });
+      return;
     }
     document.getElementById("modal-entreprise").classList.remove("open");
     render();
@@ -1068,7 +1239,7 @@ function ouvrirModalAdmin(entrepriseId) {
   document.getElementById("modal-admin2-prenom").value   = "";
   document.getElementById("modal-admin2-nom").value      = "";
   document.getElementById("modal-admin2-email").value    = "";
-  document.getElementById("modal-admin2-password").value = "";
+  document.getElementById("modal-admin2-password").value = generatePassword();
   document.getElementById("modal-admin-error").textContent = "";
   document.getElementById("modal-admin").classList.add("open");
 }
@@ -1081,16 +1252,19 @@ document.getElementById("modal-admin-save").addEventListener("click", async () =
   const btn   = document.getElementById("modal-admin-save");
   errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
   try {
+    const email    = document.getElementById("modal-admin2-email").value.trim();
+    const password = document.getElementById("modal-admin2-password").value;
     await api("create_admin", {
       entreprise_id: _adminEntrepriseId,
       prenom:   document.getElementById("modal-admin2-prenom").value.trim(),
       nom:      document.getElementById("modal-admin2-nom").value.trim(),
-      email:    document.getElementById("modal-admin2-email").value.trim(),
-      password: document.getElementById("modal-admin2-password").value,
+      email,
+      password,
     });
     toast("✅ Admin créé");
     document.getElementById("modal-admin").classList.remove("open");
     if (currentSection === "entreprises") render();
+    showCredentialsModal({ email, password });
   } catch (err) {
     errEl.textContent = "❌ " + err.message;
   } finally {
