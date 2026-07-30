@@ -526,7 +526,7 @@ function toast(msg) {
 
 // ─── Utils ──────────────────────────────────────────────────────────────
 function esc(s) {
-  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 function formatDate(iso) {
   if (!iso) return "—";
@@ -697,7 +697,7 @@ async function renderEntreprises() {
                     ${e.est_active
                       ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
                       : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
-                    <button class="btn btn-sm" data-delete="${e.id}" data-nom="${e.nom}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
+                    <button class="btn btn-sm" data-delete="${e.id}" data-nom="${esc(e.nom)}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
                   </div>
                 </td>
               </tr>
