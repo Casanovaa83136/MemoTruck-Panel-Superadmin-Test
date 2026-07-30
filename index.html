@@ -749,12 +749,31 @@ async function callEdge(fnName, body, jwt = null) {
     method: "POST", headers, body: JSON.stringify(body)
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(data.error || `Erreur ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
+let _sessionExpiredHandled = false;
+function sessionExpired() {
+  if (_sessionExpiredHandled) return;
+  _sessionExpiredHandled = true;
+  clearSession();
+  document.getElementById("screen-app").style.display = "none";
+  document.getElementById("screen-login").style.display = "flex";
+  document.getElementById("login-error").textContent = "⏱️ Session expirée — reconnectez-vous.";
+}
+
 async function api(action, body = {}) {
-  return callEdge("superadmin-api", { action, ...body }, session.jwt);
+  try {
+    return await callEdge("superadmin-api", { action, ...body }, session.jwt);
+  } catch (err) {
+    if (err.status === 401) sessionExpired();
+    throw err;
+  }
 }
 
 // ─── Toast ──────────────────────────────────────────────────────────────
@@ -777,6 +796,51 @@ function formatDateTime(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   return d.toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+}
+
+// ─── Export CSV ───────────────────────────────────────────────────────────
+function todayStamp() {
+  return new Date().toISOString().slice(0, 10);
+}
+function downloadCSV(filename, headers, rows) {
+  const csvEsc = (v) => {
+    const s = String(v ?? "");
+    return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = [headers, ...rows].map(row => row.map(csvEsc).join(";"));
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("⬇️ Export téléchargé");
+}
+function exportEntreprisesCSV(rows) {
+  const headers = ["Nom", "Code", "Pack", "Montant/mois (€)", "Statut", "Début contrat", "Fin contrat", "Chauffeurs", "Tracteurs", "Remorques", "Admins", "Contact", "Email contact", "Téléphone contact"];
+  const data = rows.map(e => [
+    e.nom, e.code_entreprise, PACK_LABEL[e.pack] || e.pack || "", montantMensuel(e) ?? "",
+    e.est_active ? "Active" : "Suspendue",
+    e.date_debut_contrat ? formatDate(e.date_debut_contrat) : "",
+    e.date_fin_contrat ? formatDate(e.date_fin_contrat) : "",
+    e.chauffeurs ?? 0, e.tracteurs ?? 0, e.remorques ?? 0, e.admins ?? 0,
+    e.contact_nom || "", e.contact_email || "", e.contact_telephone || "",
+  ]);
+  downloadCSV(`memotruck-entreprises-${todayStamp()}.csv`, headers, data);
+}
+function exportContratsCSV(rows) {
+  const headers = ["Nom", "Statut", "Pack", "Montant/mois (€)", "Début contrat", "Fin contrat", "Situation"];
+  const data = rows.map(e => {
+    const diff = e.date_fin_contrat ? daysDiff(e.date_fin_contrat) : null;
+    const situation = diff === null ? "Sans échéance" : diff < 0 ? `Expiré depuis ${Math.abs(diff)}j` : `Dans ${diff}j`;
+    return [
+      e.nom, e.est_active ? "Active" : "Suspendue", PACK_LABEL[e.pack] || e.pack || "", montantMensuel(e) ?? "",
+      e.date_debut_contrat ? formatDate(e.date_debut_contrat) : "",
+      e.date_fin_contrat ? formatDate(e.date_fin_contrat) : "",
+      situation,
+    ];
+  });
+  downloadCSV(`memotruck-contrats-${todayStamp()}.csv`, headers, data);
 }
 
 // ─── Génération de mot de passe + copie ──────────────────────────────────
@@ -1409,6 +1473,7 @@ async function renderEntreprises() {
           🔍 <input type="text" id="entreprises-search-input" placeholder="Rechercher une entreprise, un code, un contact… (Entrée pour filtrer)" value="${esc(_entreprisesSearchTerm)}" />
         </div>
         ${_entreprisesSearchTerm ? `<button class="btn btn-ghost" id="btn-clear-search">✕ Effacer</button>` : ""}
+        <button class="btn btn-ghost" id="btn-export-entreprises">⬇️ Export CSV</button>
         <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
       </div>
       <div class="ent-table-wrap">
@@ -1442,6 +1507,7 @@ async function renderEntreprises() {
     `;
 
     document.getElementById("btn-new-entreprise").addEventListener("click", () => ouvrirModalEntreprise(null));
+    document.getElementById("btn-export-entreprises").addEventListener("click", () => exportEntreprisesCSV(filtered));
     const searchInput = document.getElementById("entreprises-search-input");
     searchInput.addEventListener("input", () => { _entreprisesSearchTerm = searchInput.value; });
     searchInput.addEventListener("keydown", (e) => {
@@ -1616,6 +1682,9 @@ async function renderContrats() {
 
     main.innerHTML = `
       <div class="sa-section-title">Suivi des contrats</div>
+      <div class="dash-toprow" style="justify-content:flex-end;">
+        <button class="btn btn-ghost" id="btn-export-contrats">⬇️ Export CSV</button>
+      </div>
       ${groups.filter(g => g.items.length).map(g => `
         <div class="triage-group">
           <div class="triage-head"><span class="dot" style="background:${g.color};"></span><h3>${g.label}</h3><span class="n">${g.items.length}</span></div>
@@ -1626,6 +1695,7 @@ async function renderContrats() {
       `).join("") || `<div class="sa-loading">Aucune entreprise</div>`}
     `;
 
+    document.getElementById("btn-export-contrats").addEventListener("click", () => exportContratsCSV(entreprises));
     document.querySelectorAll("[data-edit-contrat]").forEach(btn => {
       btn.addEventListener("click", () => {
         const e = entreprises.find(x => x.id === btn.dataset.editContrat);
@@ -1847,6 +1917,7 @@ document.getElementById("btn-login").addEventListener("click", async () => {
   try {
     const data = await callEdge("superadmin-login", { email, password });
     saveSession(data);
+    _sessionExpiredHandled = false;
     document.getElementById("sa-user-email").textContent = data.email;
     showApp();
   } catch (err) {
