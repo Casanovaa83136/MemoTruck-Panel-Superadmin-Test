@@ -35,17 +35,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 
 /* ── LOGIN ── */
 #screen-login{width:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.09) 0%,var(--bg) 65%)}
-.login-box{
+.login-box{width:380px;display:flex;flex-direction:column;gap:22px}
+.login-card{
   background:var(--surface);border:1px solid rgba(0,194,255,0.15);
-  border-radius:20px;padding:36px;width:380px;
-  display:flex;flex-direction:column;gap:20px;
+  border-radius:20px;padding:30px;
+  display:flex;flex-direction:column;gap:16px;
   box-shadow:0 0 60px rgba(0,194,255,0.05);
 }
-.login-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px}
-.login-logo img{width:48px;height:48px;border-radius:13px;box-shadow:0 0 24px rgba(0,194,255,0.25)}
-.login-logo-text{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px}
-.login-title{font-size:13px;font-weight:700;color:var(--accent);text-align:center;letter-spacing:0.5px}
-.login-sub{font-size:11px;color:var(--muted);text-align:center;margin-top:-8px}
+.login-name{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.4px}
+.login-role{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase}
 .login-field{display:flex;flex-direction:column;gap:6px}
 .login-field label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
 .login-field input{
@@ -264,6 +262,54 @@ table.budget tr.total td{border-bottom:none;border-top:1.5px solid var(--border-
 .status-pill-suspended{background:rgba(239,68,68,0.12);color:var(--danger)}
 .budget-note{font-size:10.5px;color:var(--muted);line-height:1.5}
 
+/* ── AVATARS (monogrammes colorés) ── */
+.avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.avatar-sm{width:26px;height:26px;border-radius:7px;font-size:10.5px}
+.btn-icon{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+
+/* ── ENTREPRISES (lignes) ── */
+.ent-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ent-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ent-row:last-child{border-bottom:none}
+.ent-row:hover{background:rgba(0,194,255,0.025)}
+.ent-name{font-weight:700;font-size:13px;color:var(--text)}
+.ent-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.ent-col{width:100px;flex-shrink:0}
+.ent-col-num{width:56px;text-align:center;flex-shrink:0}
+.ent-num-val{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
+.ent-num-lbl{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.ent-actions{display:flex;gap:5px;flex-shrink:0}
+
+/* ── CONTRATS (triage par urgence) ── */
+.triage-group{margin-bottom:18px}
+.triage-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.triage-head .dot{width:8px;height:8px;border-radius:50%}
+.triage-head h3{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text)}
+.triage-head .n{font-size:11px;color:var(--muted);font-weight:600}
+.triage-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.triage-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.triage-row:last-child{border-bottom:none}
+.triage-dates{font-size:11px;color:var(--muted);font-family:var(--mono);flex:1;min-width:120px}
+.triage-name{font-weight:700;font-size:12.5px;width:220px;flex-shrink:0}
+
+/* ── JOURNAL (fil groupé par jour) ── */
+.journal-day{margin-bottom:20px}
+.journal-day-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;padding-left:2px}
+.journal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.journal-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.journal-row:last-child{border-bottom:none}
+.journal-icon{width:30px;height:30px;border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.journal-body{flex:1;font-size:12.5px;line-height:1.5;min-width:0}
+.journal-body b{font-weight:700}
+.journal-who{font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:2px}
+.journal-time{font-size:10.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+
+/* ── LOGIN (raffiné) ── */
+.login-lockup{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin-bottom:4px}
+.login-logo-icon{width:52px;height:52px;border-radius:15px;background:linear-gradient(160deg, rgba(0,194,255,0.25), rgba(0,194,255,0.06));border:1px solid rgba(0,194,255,0.3);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 30px rgba(0,194,255,0.15)}
+.login-tagline{font-size:12.5px;color:var(--muted);max-width:280px}
+.login-foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10.5px;color:var(--muted);margin-top:6px}
+
 /* ── TABLE ── */
 .sa-table-wrap{
   background:var(--surface);border:1px solid var(--border);
@@ -409,19 +455,25 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 <!-- ════ ÉCRAN LOGIN ════ -->
 <div id="screen-login">
   <div class="login-box">
-    <div class="login-logo">🔐</div>
-    <div class="login-title">MémoTruck</div>
-    <div class="login-sub">SUPERADMIN</div>
-    <div class="sa-field">
-      <label>EMAIL</label>
-      <input type="email" id="login-email" placeholder="superadmin@memotruck.fr" autocomplete="email" />
+    <div class="login-lockup">
+      <div class="login-logo-icon">🚚</div>
+      <div class="login-name">MémoTruck</div>
+      <div class="login-role">Superadmin</div>
+      <div class="login-tagline">Entreprises, contrats et parcs — au même endroit.</div>
     </div>
-    <div class="sa-field">
-      <label>MOT DE PASSE</label>
-      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    <div class="login-card">
+      <div class="sa-field">
+        <label>EMAIL</label>
+        <input type="email" id="login-email" placeholder="superadmin@memotruck.fr" autocomplete="email" />
+      </div>
+      <div class="sa-field">
+        <label>MOT DE PASSE</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-login" id="btn-login">Se connecter</button>
     </div>
-    <div class="login-error" id="login-error"></div>
-    <button class="btn-login" id="btn-login">Se connecter</button>
+    <div class="login-foot">🔒 Accès réservé aux comptes superadmin</div>
   </div>
 </div>
 
@@ -772,6 +824,34 @@ function activityBadge(action) {
   const a = ACTIVITY_LABELS[action] || { icon: "•", label: action, cls: "badge-blue" };
   return `<span class="badge ${a.cls}">${a.icon} ${esc(a.label)}</span>`;
 }
+const ACTIVITY_VERB = {
+  create_entreprise:     "a créé",
+  update_entreprise:     "a modifié le contrat de",
+  suspend_entreprise:    "a suspendu",
+  reactivate_entreprise: "a réactivé",
+  delete_entreprise:     "a supprimé",
+  create_admin:          "a ajouté un admin pour",
+  reset_admin_password:  "a réinitialisé le mot de passe d'un admin de",
+};
+const PERSON_PALETTE = ["#00C2FF", "#9085e9", "#3fd39c", "#e0ab2e"];
+const _personColorMap = {};
+function personColor(email) {
+  if (!_personColorMap[email]) {
+    _personColorMap[email] = PERSON_PALETTE[Object.keys(_personColorMap).length % PERSON_PALETTE.length];
+  }
+  return _personColorMap[email];
+}
+function journalDayLabel(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const startOfDay = dt => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return "Hier";
+  if (diffDays > 1 && diffDays < 7) return cap(d.toLocaleDateString("fr-FR", { weekday: "long" }));
+  return cap(d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }));
+}
 function daysDiff(iso) {
   if (!iso) return null;
   return Math.floor((new Date(iso) - Date.now()) / 86400000);
@@ -803,6 +883,15 @@ function moisEcoules(dateDebut) {
 }
 const PACK_PILL_CLASS = { starter: "pack-pill-starter", pme: "pack-pill-pme", pro: "pack-pill-pro", entreprise: "pack-pill-entreprise" };
 const PACK_LABEL = { starter: "Starter", pme: "PME", pro: "Pro", entreprise: "Entreprise" };
+
+// ─── Avatar monogramme (coloré par pack) ─────────────────────────────────
+function initials(nom) {
+  return String(nom || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?";
+}
+function avatarHTML(nom, pack, sm) {
+  const c = PACK_DONUT_COLOR[pack] || "#8492A6";
+  return `<div class="avatar${sm ? ' avatar-sm' : ''}" style="background:${c}22;color:${c};border:1px solid ${c}44;">${esc(initials(nom))}</div>`;
+}
 
 // ─── Profils véhicules autorisés ────────────────────────────────────────
 // Doit rester synchro avec PROFILS_MOTEUR / PROFILS_REMORQUE / PROFILS_ENGINS
@@ -907,29 +996,38 @@ async function renderJournal() {
   const main = document.getElementById("sa-main");
   try {
     const { logs } = await api("list_activity_log", { limit: 150 });
+
+    const byDay = {};
+    const order = [];
+    logs.forEach(l => {
+      const label = journalDayLabel(l.created_at);
+      if (!byDay[label]) { byDay[label] = []; order.push(label); }
+      byDay[label].push(l);
+    });
+
     main.innerHTML = `
       <div class="sa-section-title">Journal d'activité</div>
-      <div class="sa-table-wrap">
-        <div class="sa-table-header"><h3>${logs.length} dernière(s) action(s) — superadmin uniquement</h3></div>
-        <table>
-          <thead>
-            <tr><th>DATE</th><th>SUPERADMIN</th><th>ACTION</th><th>ENTREPRISE</th><th>DÉTAILS</th></tr>
-          </thead>
-          <tbody>
-            ${logs.length === 0
-              ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Aucune activité enregistrée pour l'instant</td></tr>`
-              : logs.map(l => `
-                <tr>
-                  <td style="white-space:nowrap;font-size:11px;color:var(--muted);">${formatDateTime(l.created_at)}</td>
-                  <td style="font-size:11px;">${esc(l.superadmin_email)}</td>
-                  <td>${activityBadge(l.action)}</td>
-                  <td>${l.entreprise_nom ? esc(l.entreprise_nom) : "—"}</td>
-                  <td style="font-size:11px;color:var(--muted);">${esc(l.details || "")}</td>
-                </tr>
-              `).join("")}
-          </tbody>
-        </table>
-      </div>
+      ${logs.length === 0
+        ? `<div class="sa-loading">Aucune activité enregistrée pour l'instant</div>`
+        : order.map(day => `
+          <div class="journal-day">
+            <div class="journal-day-lbl">${esc(day)}</div>
+            <div class="journal-card">
+              ${byDay[day].map(l => {
+                const color = personColor(l.superadmin_email);
+                return `
+                <div class="journal-row">
+                  <span class="journal-icon">${(ACTIVITY_LABELS[l.action] || { icon: "•" }).icon}</span>
+                  <div class="journal-body">
+                    <span class="journal-who" style="background:${color}22;color:${color};">${esc(l.superadmin_email.split("@")[0])}</span>
+                    ${ACTIVITY_VERB[l.action] || esc(l.action)}${l.entreprise_nom ? ` <b>${esc(l.entreprise_nom)}</b>` : ""}${l.details ? ` <span style="color:var(--muted);">(${esc(l.details)})</span>` : ""}
+                  </div>
+                  <span class="journal-time">${new Date(l.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+        `).join("")}
     `;
   } catch (e) {
     main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
@@ -1298,49 +1396,32 @@ async function renderEntreprises() {
         ${_entreprisesSearchTerm ? `<button class="btn btn-ghost" id="btn-clear-search">✕ Effacer</button>` : ""}
         <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
       </div>
-      <div class="sa-table-wrap">
-        <div class="sa-table-header">
-          <h3>Toutes les entreprises</h3>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ENTREPRISE</th><th>CODE</th><th>PACK</th><th>STATUT</th>
-              <th>FIN CONTRAT</th><th>CHAUFFEURS</th><th>TRACTEURS</th>
-              <th>ADMINS</th><th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filtered.length === 0 ? `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">Aucune entreprise ne correspond à « ${esc(_entreprisesSearchTerm)} »</td></tr>` : filtered.map(e => `
-              <tr>
-                <td>
-                  <div style="font-weight:700;color:var(--text);">${esc(e.nom)}</div>
-                  ${e.contact_nom ? `<div style="font-size:11px;color:var(--muted);">${esc(e.contact_nom)}</div>` : ""}
-                </td>
-                <td><span class="badge badge-blue">${esc(e.code_entreprise)}</span></td>
-                <td>${packBadge(e.pack)}</td>
-                <td>
-                  ${e.est_active
-                    ? `<span class="badge badge-green">✓ Active</span>`
-                    : `<span class="badge badge-red">⛔ Suspendue</span>`}</td>
-                <td>${contratBadge(e.date_fin_contrat)}</td>
-                <td style="text-align:center;">${e.chauffeurs}</td>
-                <td style="text-align:center;">${e.tracteurs}</td>
-                <td style="text-align:center;">${e.admins}</td>
-                <td>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button class="btn btn-ghost btn-sm" data-detail="${e.id}">👁️</button>
-                    <button class="btn btn-ghost btn-sm" data-edit="${e.id}">✏️</button>
-                    ${e.est_active
-                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
-                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
-                    <button class="btn btn-sm" data-delete="${e.id}" data-nom="${esc(e.nom)}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
+      <div class="ent-table-wrap">
+        ${filtered.length === 0
+          ? `<div style="text-align:center;color:var(--muted);padding:24px;">Aucune entreprise ne correspond à « ${esc(_entreprisesSearchTerm)} »</div>`
+          : filtered.map(e => `
+            <div class="ent-row">
+              ${avatarHTML(e.nom, e.pack)}
+              <div style="flex:1;min-width:160px;">
+                <div class="ent-name">${esc(e.nom)}</div>
+                <div class="ent-sub">${e.contact_nom ? esc(e.contact_nom) : esc(e.code_entreprise)}</div>
+              </div>
+              <div class="ent-col"><span class="pack-pill ${PACK_PILL_CLASS[e.pack] || ''}">${esc(PACK_LABEL[e.pack] || e.pack || '—')}</span></div>
+              <div class="ent-col"><span class="status-pill ${e.est_active ? 'status-pill-active' : 'status-pill-suspended'}">${e.est_active ? 'Active' : 'Suspendue'}</span></div>
+              <div class="ent-col">${contratBadge(e.date_fin_contrat)}</div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.chauffeurs}</div><div class="ent-num-lbl">Chauf.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.tracteurs}</div><div class="ent-num-lbl">Tract.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.admins}</div><div class="ent-num-lbl">Admins</div></div>
+              <div class="ent-actions">
+                <button class="btn btn-ghost btn-sm btn-icon" data-detail="${e.id}" title="Détail">👁️</button>
+                <button class="btn btn-ghost btn-sm btn-icon" data-edit="${e.id}" title="Modifier">✏️</button>
+                ${e.est_active
+                  ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+                  : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+                <button class="btn btn-sm btn-icon" data-delete="${e.id}" data-nom="${esc(e.nom)}" title="Supprimer" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
+              </div>
+            </div>
+          `).join("")}
       </div>
       <div id="detail-zone"></div>
     `;
@@ -1475,72 +1556,71 @@ async function afficherDetailEntreprise(id) {
 // ═══════════════════════════════════════════════════════════════════════
 // CONTRATS
 // ═══════════════════════════════════════════════════════════════════════
+function contratTriageRow(e) {
+  const diff = e.date_fin_contrat ? daysDiff(e.date_fin_contrat) : null;
+  const dates = e.date_fin_contrat
+    ? (diff < 0 ? `expiré depuis ${Math.abs(diff)}j` : `échéance dans ${diff}j`)
+    : (e.date_debut_contrat ? `depuis le ${formatDate(e.date_debut_contrat)}` : "—");
+  return `
+    <div class="triage-row">
+      ${avatarHTML(e.nom, e.pack, true)}
+      <div class="triage-name">${esc(e.nom)}</div>
+      <div class="triage-dates">${dates}</div>
+      ${contratBadge(e.date_fin_contrat)}
+      <button class="btn btn-ghost btn-sm" data-edit-contrat="${e.id}">✏️ Modifier</button>
+      ${e.est_active
+        ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+        : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+    </div>`;
+}
+
 async function renderContrats() {
   const main = document.getElementById("sa-main");
   try {
     const { entreprises } = await api("list_entreprises");
-    const sorted = [...entreprises].sort((a, b) => {
-      if (!a.date_fin_contrat) return 1;
-      if (!b.date_fin_contrat) return -1;
-      return new Date(a.date_fin_contrat) - new Date(b.date_fin_contrat);
-    });
 
-    const enAlerte = sorted.filter(e => {
-      if (!e.date_fin_contrat) return false;
-      return daysDiff(e.date_fin_contrat) < 30;
-    });
-
+    const enAlerte = entreprises.filter(e => e.date_fin_contrat && daysDiff(e.date_fin_contrat) < 30);
     const badgeC = document.getElementById("badge-contrats");
     if (enAlerte.length > 0) { badgeC.textContent = enAlerte.length; badgeC.classList.add("show"); }
     else badgeC.classList.remove("show");
 
+    const withDate = entreprises.filter(e => e.date_fin_contrat);
+    const groups = [
+      { label: "Expirés", color: "var(--danger)", items: withDate.filter(e => daysDiff(e.date_fin_contrat) < 0) },
+      { label: "Cette semaine (< 15j)", color: "var(--danger)", items: withDate.filter(e => { const d = daysDiff(e.date_fin_contrat); return d >= 0 && d < 15; }) },
+      { label: "Ce mois (< 30j)", color: "var(--warning)", items: withDate.filter(e => { const d = daysDiff(e.date_fin_contrat); return d >= 15 && d < 30; }) },
+      { label: "Au-delà", color: "var(--muted-2)", items: withDate.filter(e => daysDiff(e.date_fin_contrat) >= 30) },
+      { label: "Sans échéance définie", color: "var(--muted-2)", items: entreprises.filter(e => !e.date_fin_contrat) },
+    ];
+    // Trie chaque groupe par échéance croissante (les plus urgents en premier)
+    groups.forEach(g => g.items.sort((a, b) => {
+      if (!a.date_fin_contrat) return 1;
+      if (!b.date_fin_contrat) return -1;
+      return new Date(a.date_fin_contrat) - new Date(b.date_fin_contrat);
+    }));
+
     main.innerHTML = `
       <div class="sa-section-title">Suivi des contrats</div>
-      <div class="sa-table-wrap">
-        <div class="sa-table-header"><h3>Tous les contrats</h3></div>
-        <table>
-          <thead>
-            <tr><th>ENTREPRISE</th><th>STATUT</th><th>DÉBUT</th><th>FIN CONTRAT</th><th>ALERTE</th><th>ACTIONS</th></tr>
-          </thead>
-          <tbody>
-            ${sorted.map(e => {
-              const diff = daysDiff(e.date_fin_contrat);
-              let alerteHTML = `<span style="color:var(--muted);font-size:11px;">OK</span>`;
-              if (diff !== null && diff < 0)  alerteHTML = `<span class="badge badge-red">⚠️ Expiré depuis ${Math.abs(diff)}j</span>`;
-              else if (diff !== null && diff < 15) alerteHTML = `<span class="badge badge-red">🔴 Dans ${diff}j</span>`;
-              else if (diff !== null && diff < 30) alerteHTML = `<span class="badge badge-orange">🟠 Dans ${diff}j</span>`;
-              else if (diff !== null && diff < 60) alerteHTML = `<span class="badge badge-yellow">🟡 Dans ${diff}j</span>`;
-              return `<tr>
-                <td><strong>${esc(e.nom)}</strong></td>
-                <td>${e.est_active ? `<span class="badge badge-green">Active</span>` : `<span class="badge badge-red">Suspendue</span>`}</td>
-                <td>${formatDate(e.date_debut_contrat)}</td>
-                <td>${formatDate(e.date_fin_contrat)}</td>
-                <td>${alerteHTML}</td>
-                <td>
-                  <div style="display:flex;gap:6px;">
-                    <button class="btn btn-ghost btn-sm" data-edit-contrat="${e.id}">✏️ Modifier</button>
-                    ${e.est_active
-                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
-                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
-                  </div>
-                </td>
-              </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
+      ${groups.filter(g => g.items.length).map(g => `
+        <div class="triage-group">
+          <div class="triage-head"><span class="dot" style="background:${g.color};"></span><h3>${g.label}</h3><span class="n">${g.items.length}</span></div>
+          <div class="triage-card">
+            ${g.items.map(contratTriageRow).join("")}
+          </div>
+        </div>
+      `).join("") || `<div class="sa-loading">Aucune entreprise</div>`}
     `;
 
     document.querySelectorAll("[data-edit-contrat]").forEach(btn => {
       btn.addEventListener("click", () => {
-        const e = sorted.find(x => x.id === btn.dataset.editContrat);
+        const e = entreprises.find(x => x.id === btn.dataset.editContrat);
         if (e) ouvrirModalEntreprise(e);
       });
     });
     document.querySelectorAll("[data-toggle]").forEach(btn => {
       btn.addEventListener("click", async () => {
         const active = btn.dataset.active === "true";
-        const e = sorted.find(x => x.id === btn.dataset.toggle);
+        const e = entreprises.find(x => x.id === btn.dataset.toggle);
         if (!e || !confirm(`${active ? "Réactiver" : "Suspendre"} "${e.nom}" ?`)) return;
         try {
           await api("toggle_entreprise", { entreprise_id: btn.dataset.toggle, est_active: active });
