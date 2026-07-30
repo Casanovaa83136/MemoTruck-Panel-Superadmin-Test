@@ -81,9 +81,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .sa-nav-item{
   display:flex;align-items:center;gap:10px;
   padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);
-  border-radius:var(--radius-sm);transition:all 0.15s;position:relative;
+  border-radius:var(--radius-sm);position:relative;
+  transition:background 0.15s, color 0.15s, transform 0.15s;
 }
-.sa-nav-item:hover{background:rgba(0,194,255,0.07);color:var(--text)}
+.sa-nav-item:hover{background:rgba(0,194,255,0.07);color:var(--text);transform:translateX(3px)}
+.sa-nav-item:not(.active):hover::before{
+  content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+  width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
+  opacity:0.35;
+}
 .sa-nav-item.active{
   background:rgba(0,194,255,0.1);color:var(--accent);
   border:1px solid rgba(0,194,255,0.18);
@@ -92,6 +98,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
   content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
   width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
   box-shadow:0 0 8px var(--accent);
+}
+@media (prefers-reduced-motion: reduce){
+  .sa-nav-item{transition:background 0.15s, color 0.15s}
+  .sa-nav-item:hover{transform:none}
 }
 .sa-badge{
   margin-left:auto;background:var(--danger);color:#fff;
