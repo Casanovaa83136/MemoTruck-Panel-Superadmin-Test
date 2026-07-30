@@ -289,6 +289,7 @@ table.budget tr.total td{border-bottom:none;border-top:1.5px solid var(--border-
 .ent-num-val{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
 .ent-num-lbl{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
 .ent-actions{display:flex;gap:5px;flex-shrink:0}
+.ent-checkbox{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
 
 /* ── CONTRATS (triage par urgence) ── */
 .triage-group{margin-bottom:18px}
@@ -510,6 +511,7 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <span class="sa-badge" id="badge-contrats">0</span>
     </div>
     <div class="sa-nav-item" data-section="journal">🕒 Journal d'activité</div>
+    <div class="sa-nav-item" data-section="superadmins">🔐 Comptes superadmin</div>
 
     <div class="sa-sidebar-footer">
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;" id="sa-user-email"></div>
@@ -653,6 +655,33 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
     <div class="sa-modal-actions">
       <button class="btn btn-ghost" id="modal-admin-cancel">Annuler</button>
       <button class="btn btn-primary" id="modal-admin-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL COMPTE SUPERADMIN ════ -->
+<div class="sa-modal-overlay" id="modal-superadmin">
+  <div class="sa-modal">
+    <div class="sa-modal-header">
+      <h2>Ajouter un compte superadmin</h2>
+      <button class="sa-modal-close" id="modal-superadmin-close">✕</button>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL *</label>
+      <input type="email" id="modal-superadmin-email" placeholder="associe@memotruck.fr" />
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE *</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="modal-superadmin-password" style="flex:1;" />
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-superadmin-password-gen" title="Générer un mot de passe">🎲</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-superadmin-password-copy" title="Copier">📋</button>
+      </div>
+    </div>
+    <div class="sa-error" id="modal-superadmin-error"></div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="modal-superadmin-cancel">Annuler</button>
+      <button class="btn btn-primary" id="modal-superadmin-save">✓ Créer</button>
     </div>
   </div>
 </div>
@@ -864,6 +893,7 @@ function attachPasswordGenerator(inputId, genBtnId, copyBtnId) {
 }
 attachPasswordGenerator("modal-admin-password",  "modal-admin-password-gen",  "modal-admin-password-copy");
 attachPasswordGenerator("modal-admin2-password", "modal-admin2-password-gen", "modal-admin2-password-copy");
+attachPasswordGenerator("modal-superadmin-password", "modal-superadmin-password-gen", "modal-superadmin-password-copy");
 
 // ─── Modale identifiants (affichage persistant, ne disparaît pas seul) ───
 function showCredentialsModal({ email, password, code }) {
@@ -898,6 +928,8 @@ const ACTIVITY_LABELS = {
   delete_entreprise:     { icon: "🗑️", label: "Entreprise supprimée",      cls: "badge-red"    },
   create_admin:          { icon: "👤", label: "Admin créé",                cls: "badge-blue"   },
   reset_admin_password:  { icon: "🔑", label: "Mot de passe réinitialisé", cls: "badge-orange" },
+  create_superadmin:     { icon: "🔐", label: "Compte superadmin créé",    cls: "badge-blue"   },
+  delete_superadmin:     { icon: "🚫", label: "Compte superadmin supprimé",cls: "badge-red"    },
 };
 function activityBadge(action) {
   const a = ACTIVITY_LABELS[action] || { icon: "•", label: action, cls: "badge-blue" };
@@ -911,6 +943,8 @@ const ACTIVITY_VERB = {
   delete_entreprise:     "a supprimé",
   create_admin:          "a ajouté un admin pour",
   reset_admin_password:  "a réinitialisé le mot de passe d'un admin de",
+  create_superadmin:     "a créé un compte superadmin",
+  delete_superadmin:     "a supprimé un compte superadmin",
 };
 const PERSON_PALETTE = ["#00C2FF", "#9085e9", "#3fd39c", "#e0ab2e"];
 const _personColorMap = {};
@@ -1048,7 +1082,7 @@ function contratBadge(iso) {
 
 // ─── Navigation ─────────────────────────────────────────────────────────
 let currentSection = "dashboard";
-const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité" };
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", superadmins:"Comptes superadmin" };
 function navigateTo(section) {
   currentSection = section;
   document.querySelectorAll(".sa-nav-item").forEach(el => {
@@ -1066,6 +1100,7 @@ function render() {
   if (currentSection === "entreprises") renderEntreprises();
   if (currentSection === "contrats")    renderContrats();
   if (currentSection === "journal")     renderJournal();
+  if (currentSection === "superadmins") renderSuperadmins();
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1441,6 +1476,40 @@ async function renderDashboard() {
 // ═══════════════════════════════════════════════════════════════════════
 let _entreprises = [];
 let _entreprisesSearchTerm = "";
+let _entSelected = new Set();
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  if (!bar) return;
+  const selected = _entreprises.filter(e => _entSelected.has(e.id));
+  if (selected.length === 0) { bar.innerHTML = ""; return; }
+  const activeSel = selected.filter(e => e.est_active);
+  const suspSel = selected.filter(e => !e.est_active);
+  bar.innerHTML = `
+    <div class="dash-toprow" style="background:var(--card);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:10px 14px;">
+      <div style="font-size:12px;font-weight:700;flex:1;">${selected.length} sélectionnée(s)</div>
+      ${activeSel.length ? `<button class="btn btn-danger btn-sm" id="bulk-suspend">⛔ Suspendre (${activeSel.length})</button>` : ""}
+      ${suspSel.length ? `<button class="btn btn-success btn-sm" id="bulk-reactivate">✓ Réactiver (${suspSel.length})</button>` : ""}
+      <button class="btn btn-ghost btn-sm" id="bulk-clear">✕ Annuler la sélection</button>
+    </div>
+  `;
+  document.getElementById("bulk-clear").addEventListener("click", () => {
+    _entSelected.clear();
+    document.querySelectorAll(".ent-checkbox").forEach(cb => cb.checked = false);
+    updateBulkBar();
+  });
+  const doBulkToggle = async (list, active) => {
+    if (!confirm(`${active ? "Réactiver" : "Suspendre"} ${list.length} entreprise(s) ?\n${list.map(e => e.nom).join(", ")}`)) return;
+    try {
+      await Promise.all(list.map(e => api("toggle_entreprise", { entreprise_id: e.id, est_active: active })));
+      toast(active ? "✅ Entreprises réactivées" : "⛔ Entreprises suspendues");
+      _entSelected.clear();
+      renderEntreprises();
+    } catch (err) { toast("❌ " + err.message); }
+  };
+  document.getElementById("bulk-suspend")?.addEventListener("click", () => doBulkToggle(activeSel, false));
+  document.getElementById("bulk-reactivate")?.addEventListener("click", () => doBulkToggle(suspSel, true));
+}
 
 function filterEntreprises(entreprises, term) {
   if (!term) return entreprises;
@@ -1476,11 +1545,13 @@ async function renderEntreprises() {
         <button class="btn btn-ghost" id="btn-export-entreprises">⬇️ Export CSV</button>
         <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
       </div>
+      <div id="bulk-bar"></div>
       <div class="ent-table-wrap">
         ${filtered.length === 0
           ? `<div style="text-align:center;color:var(--muted);padding:24px;">Aucune entreprise ne correspond à « ${esc(_entreprisesSearchTerm)} »</div>`
           : filtered.map(e => `
             <div class="ent-row">
+              <input type="checkbox" class="ent-checkbox" data-id="${e.id}" ${_entSelected.has(e.id) ? 'checked' : ''} />
               ${avatarHTML(e.nom, e.pack)}
               <div style="flex:1;min-width:160px;">
                 <div class="ent-name">${esc(e.nom)}</div>
@@ -1515,6 +1586,14 @@ async function renderEntreprises() {
     });
     if (_entreprisesSearchTerm) searchInput.focus();
     document.getElementById("btn-clear-search")?.addEventListener("click", () => { _entreprisesSearchTerm = ""; renderEntreprises(); });
+
+    document.querySelectorAll(".ent-checkbox").forEach(cb => {
+      cb.addEventListener("change", () => {
+        if (cb.checked) _entSelected.add(cb.dataset.id); else _entSelected.delete(cb.dataset.id);
+        updateBulkBar();
+      });
+    });
+    updateBulkBar();
 
     // Détail
     document.querySelectorAll("[data-detail]").forEach(btn => {
@@ -1853,6 +1932,81 @@ document.getElementById("modal-admin-save").addEventListener("click", async () =
     btn.disabled = false; btn.textContent = "✓ Créer";
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPTES SUPERADMIN
+// ═══════════════════════════════════════════════════════════════════════
+function ouvrirModalSuperadmin() {
+  document.getElementById("modal-superadmin-email").value    = "";
+  document.getElementById("modal-superadmin-password").value = generatePassword();
+  document.getElementById("modal-superadmin-error").textContent = "";
+  document.getElementById("modal-superadmin").classList.add("open");
+}
+
+document.getElementById("modal-superadmin-close").addEventListener("click",  () => document.getElementById("modal-superadmin").classList.remove("open"));
+document.getElementById("modal-superadmin-cancel").addEventListener("click", () => document.getElementById("modal-superadmin").classList.remove("open"));
+
+document.getElementById("modal-superadmin-save").addEventListener("click", async () => {
+  const errEl = document.getElementById("modal-superadmin-error");
+  const btn   = document.getElementById("modal-superadmin-save");
+  errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
+  try {
+    const email    = document.getElementById("modal-superadmin-email").value.trim();
+    const password = document.getElementById("modal-superadmin-password").value;
+    if (!email) { errEl.textContent = "❌ Email requis"; return; }
+    await api("create_superadmin", { email, password });
+    toast("✅ Compte superadmin créé");
+    document.getElementById("modal-superadmin").classList.remove("open");
+    renderSuperadmins();
+    showCredentialsModal({ email, password });
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "✓ Créer";
+  }
+});
+
+async function renderSuperadmins() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { superadmins } = await api("list_superadmins");
+    main.innerHTML = `
+      <div class="sa-section-title">Comptes superadmin (${superadmins.length})</div>
+      <div class="dash-toprow" style="justify-content:flex-end;">
+        <button class="btn btn-primary" id="btn-new-superadmin">+ Ajouter un compte</button>
+      </div>
+      <div class="ent-table-wrap">
+        ${superadmins.map(s => `
+          <div class="ent-row">
+            <div class="avatar" style="background:rgba(0,194,255,0.13);color:var(--accent);border:1px solid rgba(0,194,255,0.3);">${esc(initials(s.email.split("@")[0]))}</div>
+            <div style="flex:1;min-width:160px;">
+              <div class="ent-name">${esc(s.email)} ${s.id === session.superadmin_id ? '<span class="badge badge-blue" style="margin-left:6px;">Vous</span>' : ''}</div>
+              <div class="ent-sub">Créé le ${formatDate(s.created_at)}</div>
+            </div>
+            <div class="ent-actions">
+              ${s.id === session.superadmin_id ? '' : `<button class="btn btn-sm" data-delete-superadmin="${s.id}" data-email="${esc(s.email)}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️ Supprimer</button>`}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    document.getElementById("btn-new-superadmin").addEventListener("click", ouvrirModalSuperadmin);
+    document.querySelectorAll("[data-delete-superadmin]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.deleteSuperadmin;
+        const email = btn.dataset.email;
+        if (!confirm(`Supprimer définitivement le compte superadmin "${email}" ?\nCette personne ne pourra plus se connecter.`)) return;
+        try {
+          await api("delete_superadmin", { superadmin_id: id });
+          toast("✅ Compte supprimé");
+          renderSuperadmins();
+        } catch (err) { toast("❌ " + err.message); }
+      });
+    });
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // SUPPRESSION ENTREPRISE
