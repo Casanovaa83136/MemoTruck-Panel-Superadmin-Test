@@ -20,25 +20,30 @@
   --danger:#EF4444;
   --text:#F1F5F9;
   --muted:#64748B;
+  --muted-2:#8492A6;
+  --border-strong:rgba(255,255,255,0.13);
   --radius:12px;
   --radius-sm:8px;
   --sidebar:220px;
+  --series-starter:#d95926;
+  --series-pme:#199e70;
+  --series-pro:#c98500;
+  --series-ent:#d55181;
+  --mono: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;-webkit-font-smoothing:antialiased}
 
 /* ── LOGIN ── */
 #screen-login{width:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.09) 0%,var(--bg) 65%)}
-.login-box{
+.login-box{width:380px;display:flex;flex-direction:column;gap:22px}
+.login-card{
   background:var(--surface);border:1px solid rgba(0,194,255,0.15);
-  border-radius:20px;padding:36px;width:380px;
-  display:flex;flex-direction:column;gap:20px;
+  border-radius:20px;padding:30px;
+  display:flex;flex-direction:column;gap:16px;
   box-shadow:0 0 60px rgba(0,194,255,0.05);
 }
-.login-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px}
-.login-logo img{width:48px;height:48px;border-radius:13px;box-shadow:0 0 24px rgba(0,194,255,0.25)}
-.login-logo-text{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px}
-.login-title{font-size:13px;font-weight:700;color:var(--accent);text-align:center;letter-spacing:0.5px}
-.login-sub{font-size:11px;color:var(--muted);text-align:center;margin-top:-8px}
+.login-name{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.4px}
+.login-role{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase}
 .login-field{display:flex;flex-direction:column;gap:6px}
 .login-field label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
 .login-field input{
@@ -76,9 +81,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .sa-nav-item{
   display:flex;align-items:center;gap:10px;
   padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);
-  border-radius:var(--radius-sm);transition:all 0.15s;position:relative;
+  border-radius:var(--radius-sm);position:relative;
+  transition:background 0.15s, color 0.15s, transform 0.15s;
 }
-.sa-nav-item:hover{background:rgba(0,194,255,0.07);color:var(--text)}
+.sa-nav-item:hover{background:rgba(0,194,255,0.07);color:var(--text);transform:translateX(3px)}
+.sa-nav-item:not(.active):hover::before{
+  content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+  width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
+  opacity:0.35;
+}
 .sa-nav-item.active{
   background:rgba(0,194,255,0.1);color:var(--accent);
   border:1px solid rgba(0,194,255,0.18);
@@ -87,6 +98,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
   content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
   width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
   box-shadow:0 0 8px var(--accent);
+}
+@media (prefers-reduced-motion: reduce){
+  .sa-nav-item{transition:background 0.15s, color 0.15s}
+  .sa-nav-item:hover{transform:none}
 }
 .sa-badge{
   margin-left:auto;background:var(--danger);color:#fff;
@@ -163,6 +178,148 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .sa-alert-nom{font-size:12px;font-weight:600;color:var(--text);flex:1}
 .sa-alert-date{font-size:11px;font-weight:700;color:var(--warning)}
 .sa-alert-date.expired{color:var(--danger)}
+
+/* ── DASHBOARD : recherche rapide ── */
+.dash-toprow{display:flex;gap:12px;align-items:center}
+.dash-search{flex:1;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 14px}
+.dash-search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:13px;padding:11px 0;font-family:inherit}
+.dash-search input::placeholder{color:var(--muted)}
+
+/* ── DASHBOARD : hero MRR ── */
+.dash-hero-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px}
+.dash-hero-mrr{
+  background:linear-gradient(160deg, rgba(0,194,255,0.10), rgba(0,194,255,0.02) 60%), var(--surface);
+  border:1px solid rgba(0,194,255,0.25);border-radius:var(--radius);padding:18px 20px;
+  display:flex;flex-direction:column;gap:5px;justify-content:center;
+}
+.dash-hero-mrr .lbl{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.6px}
+.dash-hero-mrr .val{font-size:34px;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1.05}
+.dash-hero-mrr .sub{font-size:11px;color:var(--muted)}
+@media (max-width:920px){ .dash-hero-row{grid-template-columns:1fr 1fr} }
+
+/* ── DASHBOARD : cartes / grille widgets ── */
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.dash-card-title{font-size:12.5px;font-weight:800;color:var(--text)}
+.dash-card-title .n{color:var(--muted);font-weight:600;margin-left:4px}
+.dash-midrow{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px}
+.dash-botrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:920px){ .dash-midrow, .dash-botrow{grid-template-columns:1fr} }
+
+/* growth sparkline */
+.spark-top{display:flex;justify-content:space-between;align-items:baseline}
+.spark-val{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums}
+.spark-val .plus{color:var(--accent)}
+.spark-caption{font-size:11px;color:var(--muted)}
+.spark-wrap{position:relative}
+.spark-svg{width:100%;height:70px;overflow:visible}
+.spark-tip{position:absolute;background:var(--card);border:1px solid var(--border-strong);border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;transform:translate(-50%,-130%);z-index:10}
+
+/* pack donut */
+.donut-body{display:flex;align-items:center;gap:16px}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:7px;flex:1;min-width:0}
+.donut-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.donut-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.donut-name{flex:1;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.donut-pct{color:var(--muted);font-variant-numeric:tabular-nums;font-size:11.5px}
+.donut-count{font-weight:800;font-variant-numeric:tabular-nums;width:18px;text-align:right}
+.donut-seg{transition:opacity .12s;cursor:pointer}
+.donut-seg:hover{opacity:0.7}
+.donut-center-val{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+.donut-center-lbl{font-size:8px;font-weight:700}
+
+/* watchlist */
+.watch-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.watch-row:last-child{border-bottom:none;padding-bottom:0}
+.watch-name{flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.watch-chip{font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.watch-chip-danger{background:rgba(239,68,68,0.12);color:var(--danger);border:1px solid rgba(239,68,68,0.25)}
+.watch-chip-warning{background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.25)}
+.watch-empty{font-size:12px;color:var(--muted);padding:6px 0}
+
+/* activity feed (dashboard preview) */
+.dash-feed-row{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.dash-feed-row:last-child{border-bottom:none;padding-bottom:0}
+.dash-feed-icon{width:24px;height:24px;border-radius:6px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.dash-feed-body{flex:1;font-size:11.5px;line-height:1.45;min-width:0}
+.dash-feed-body b{font-weight:700}
+.dash-feed-meta{font-size:10px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+
+/* budget table */
+.budget-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.budget-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px}
+.budget-kpi .val{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+.budget-kpi .lbl{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px}
+@media (max-width:700px){ .budget-kpis{grid-template-columns:1fr} }
+.budget-table-wrap{overflow-x:auto}
+table.budget{width:100%;border-collapse:collapse;font-size:12px}
+table.budget th{
+  text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:0.5px;padding:8px 10px;border-bottom:1px solid var(--border-strong);white-space:nowrap;
+}
+table.budget td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+table.budget td.num{font-variant-numeric:tabular-nums;text-align:right}
+table.budget tr.more td{color:var(--muted);font-style:italic;text-align:center;cursor:pointer}
+table.budget tr.more td:hover{color:var(--accent)}
+table.budget tr.total td{border-bottom:none;border-top:1.5px solid var(--border-strong);font-weight:800;padding-top:11px}
+.pack-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;display:inline-block}
+.pack-pill-starter{background:rgba(217,89,38,0.13);color:#e8834f}
+.pack-pill-pme{background:rgba(25,158,112,0.15);color:#3fd39c}
+.pack-pill-pro{background:rgba(201,133,0,0.15);color:#e0ab2e}
+.pack-pill-entreprise{background:rgba(213,81,129,0.15);color:#eb8bab}
+.status-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px}
+.status-pill-active{background:rgba(34,197,94,0.12);color:var(--success)}
+.status-pill-suspended{background:rgba(239,68,68,0.12);color:var(--danger)}
+.budget-note{font-size:10.5px;color:var(--muted);line-height:1.5}
+
+/* ── AVATARS (monogrammes colorés) ── */
+.avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.avatar-sm{width:26px;height:26px;border-radius:7px;font-size:10.5px}
+.btn-icon{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+
+/* ── ENTREPRISES (lignes) ── */
+.ent-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ent-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ent-row:last-child{border-bottom:none}
+.ent-row:hover{background:rgba(0,194,255,0.025)}
+.ent-name{font-weight:700;font-size:13px;color:var(--text)}
+.ent-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.ent-col{width:100px;flex-shrink:0}
+.ent-col-num{width:56px;text-align:center;flex-shrink:0}
+.ent-num-val{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
+.ent-num-lbl{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.ent-actions{display:flex;gap:5px;flex-shrink:0}
+.ent-checkbox{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+
+/* ── CONTRATS (triage par urgence) ── */
+.triage-group{margin-bottom:18px}
+.triage-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.triage-head .dot{width:8px;height:8px;border-radius:50%}
+.triage-head h3{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text)}
+.triage-head .n{font-size:11px;color:var(--muted);font-weight:600}
+.triage-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.triage-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.triage-row:last-child{border-bottom:none}
+.triage-dates{font-size:11px;color:var(--muted);font-family:var(--mono);flex:1;min-width:120px}
+.triage-name{font-weight:700;font-size:12.5px;width:220px;flex-shrink:0}
+
+/* ── JOURNAL (fil groupé par jour) ── */
+.journal-day{margin-bottom:20px}
+.journal-day-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;padding-left:2px}
+.journal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.journal-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.journal-row:last-child{border-bottom:none}
+.journal-icon{width:30px;height:30px;border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.journal-body{flex:1;font-size:12.5px;line-height:1.5;min-width:0}
+.journal-body b{font-weight:700}
+.journal-who{font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:2px}
+.journal-time{font-size:10.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+
+/* ── LOGIN (raffiné) ── */
+.login-lockup{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin-bottom:4px}
+.login-logo-icon{width:64px;height:64px;border-radius:17px;object-fit:cover;box-shadow:0 0 30px rgba(0,194,255,0.2)}
+.login-tagline{font-size:12.5px;color:var(--muted);max-width:280px}
+.login-foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10.5px;color:var(--muted);margin-top:6px}
 
 /* ── TABLE ── */
 .sa-table-wrap{
@@ -251,6 +408,20 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 .sa-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
 .sa-error{font-size:12px;color:var(--danger);text-align:center;min-height:16px}
 
+/* ── PROFILS VÉHICULES (grille de cases à cocher) ── */
+.sa-profils-hint{font-size:11px;color:var(--muted);margin-top:-6px}
+.sa-profils-toolbar{display:flex;justify-content:flex-end;gap:14px}
+.sa-profils-link{font-size:11px;color:var(--accent);cursor:pointer;font-weight:700;background:none;border:none;font-family:inherit;padding:0}
+.sa-profils-link:hover{text-decoration:underline}
+.sa-profils-wrap{display:flex;flex-direction:column;gap:10px}
+.sa-profils-group{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px}
+.sa-profils-group-title{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.sa-profils-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.sa-profils-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);cursor:pointer}
+.sa-profils-item input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.sa-profils-badges{display:flex;flex-wrap:wrap;gap:6px}
+.sa-profils-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(0,194,255,0.08);color:var(--accent);border:1px solid rgba(0,194,255,0.18)}
+
 /* ── TOAST ── */
 .sa-toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -295,19 +466,25 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 <!-- ════ ÉCRAN LOGIN ════ -->
 <div id="screen-login">
   <div class="login-box">
-    <div class="login-logo">🔐</div>
-    <div class="login-title">MémoTruck</div>
-    <div class="login-sub">SUPERADMIN</div>
-    <div class="sa-field">
-      <label>EMAIL</label>
-      <input type="email" id="login-email" placeholder="superadmin@memotruck.fr" autocomplete="email" />
+    <div class="login-lockup">
+      <img src="icon192.png" alt="MémoTruck" class="login-logo-icon" />
+      <div class="login-name">MémoTruck</div>
+      <div class="login-role">Superadmin</div>
+      <div class="login-tagline">Entreprises, contrats et parcs — au même endroit.</div>
     </div>
-    <div class="sa-field">
-      <label>MOT DE PASSE</label>
-      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    <div class="login-card">
+      <div class="sa-field">
+        <label>EMAIL</label>
+        <input type="email" id="login-email" placeholder="superadmin@memotruck.fr" autocomplete="email" />
+      </div>
+      <div class="sa-field">
+        <label>MOT DE PASSE</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-login" id="btn-login">Se connecter</button>
     </div>
-    <div class="login-error" id="login-error"></div>
-    <button class="btn-login" id="btn-login">Se connecter</button>
+    <div class="login-foot">🔒 Accès réservé aux comptes superadmin</div>
   </div>
 </div>
 
@@ -316,8 +493,13 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 
   <!-- SIDEBAR -->
   <div class="sa-sidebar">
-    <div class="sa-logo">🚚 MémoTruck</div>
-    <div class="sa-logo-sub">SUPERADMIN</div>
+    <div class="sa-logo-wrap">
+      <img src="icon192.png" alt="MémoTruck" class="sa-logo-img" />
+      <div class="sa-logo-text">
+        <div class="sa-logo">MémoTruck</div>
+        <div class="sa-logo-sub">SUPERADMIN</div>
+      </div>
+    </div>
 
     <div class="sa-nav-item active" data-section="dashboard">📊 Dashboard</div>
     <div class="sa-nav-item" data-section="entreprises">
@@ -328,6 +510,8 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       📋 Contrats
       <span class="sa-badge" id="badge-contrats">0</span>
     </div>
+    <div class="sa-nav-item" data-section="journal">🕒 Journal d'activité</div>
+    <div class="sa-nav-item" data-section="superadmins">🔐 Comptes superadmin</div>
 
     <div class="sa-sidebar-footer">
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;" id="sa-user-email"></div>
@@ -363,6 +547,10 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
         <option value="entreprise">🏭 Entreprise — illimité — Sur devis</option>
       </select>
     </div>
+    <div class="sa-field" id="modal-montant-perso-row" style="display:none;">
+      <label>MONTANT MENSUEL NÉGOCIÉ (€) *</label>
+      <input type="number" id="modal-montant-perso" placeholder="450" min="0" step="1" />
+    </div>
     <div class="sa-field-row">
       <div class="sa-field">
         <label>DÉBUT CONTRAT</label>
@@ -392,7 +580,21 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <textarea id="modal-notes" rows="2" placeholder="Notes internes…"></textarea>
     </div>
 
-    <div class="sa-section-sep" id="modal-admin-section">COMPTE ADMIN (Chef de parc)</div>
+    <div class="sa-section-sep">VÉHICULES AUTORISÉS</div>
+    <div class="sa-profils-hint">Types de véhicules que l'entreprise pourra ajouter dans son parc.</div>
+    <div class="sa-profils-toolbar">
+      <button type="button" class="sa-profils-link" id="profils-select-all">Tout cocher</button>
+      <button type="button" class="sa-profils-link" id="profils-select-none">Tout décocher</button>
+    </div>
+    <div class="sa-profils-wrap" id="modal-profils-grid"></div>
+
+    <div class="sa-section-sep">OPTIONS</div>
+    <label class="sa-field" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+      <input type="checkbox" id="modal-panel-mecano" style="width:18px;height:18px;" />
+      <span>🔧 Panel atelier (mécanicien) — permet de créer des comptes mécanicien pour cette entreprise</span>
+    </label>
+
+    <div class="sa-section-sep" id="modal-admin-section">COMPTE ADMIN</div>
     <div id="modal-admin-fields">
       <div class="sa-field-row" style="margin-bottom:12px;">
         <div class="sa-field">
@@ -410,7 +612,11 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       </div>
       <div class="sa-field">
         <label>MOT DE PASSE TEMPORAIRE *</label>
-        <input type="text" id="modal-admin-password" placeholder="Mot de passe à communiquer au client" />
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="modal-admin-password" placeholder="Mot de passe à communiquer au client" style="flex:1;" />
+          <button type="button" class="btn btn-ghost btn-sm" id="modal-admin-password-gen" title="Générer un mot de passe">🎲</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="modal-admin-password-copy" title="Copier">📋</button>
+        </div>
       </div>
     </div>
 
@@ -443,14 +649,90 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <label>EMAIL *</label>
       <input type="email" id="modal-admin2-email" />
     </div>
+    <div class="sa-field" id="modal-admin2-role-row" style="display:none;">
+      <label>RÔLE</label>
+      <select id="modal-admin2-role" style="width:100%;height:44px;background:#ffffff;border:1.5px solid var(--sa-border, rgba(255,255,255,0.15));border-radius:10px;padding:0 14px;color:#1a1a1a;font-size:14px;font-weight:600;">
+        <option value="exploitation">🏢 Exploitation (bureau)</option>
+        <option value="mecanicien">🔧 Mécanicien (atelier)</option>
+      </select>
+    </div>
     <div class="sa-field">
       <label>MOT DE PASSE *</label>
-      <input type="text" id="modal-admin2-password" />
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="modal-admin2-password" style="flex:1;" />
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-admin2-password-gen" title="Générer un mot de passe">🎲</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-admin2-password-copy" title="Copier">📋</button>
+      </div>
     </div>
     <div class="sa-error" id="modal-admin-error"></div>
     <div class="sa-modal-actions">
       <button class="btn btn-ghost" id="modal-admin-cancel">Annuler</button>
       <button class="btn btn-primary" id="modal-admin-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL COMPTE SUPERADMIN ════ -->
+<div class="sa-modal-overlay" id="modal-superadmin">
+  <div class="sa-modal">
+    <div class="sa-modal-header">
+      <h2>Ajouter un compte superadmin</h2>
+      <button class="sa-modal-close" id="modal-superadmin-close">✕</button>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL *</label>
+      <input type="email" id="modal-superadmin-email" placeholder="associe@memotruck.fr" />
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE *</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="modal-superadmin-password" style="flex:1;" />
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-superadmin-password-gen" title="Générer un mot de passe">🎲</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="modal-superadmin-password-copy" title="Copier">📋</button>
+      </div>
+    </div>
+    <div class="sa-error" id="modal-superadmin-error"></div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="modal-superadmin-cancel">Annuler</button>
+      <button class="btn btn-primary" id="modal-superadmin-save">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODALE IDENTIFIANTS (affichage persistant après création/reset) ════ -->
+<div class="sa-modal-overlay" id="modal-credentials">
+  <div class="sa-modal" style="width:420px;border:1px solid rgba(34,197,94,0.3);">
+    <div class="sa-modal-header">
+      <h2 style="color:var(--success);">✅ Identifiants</h2>
+      <button class="sa-modal-close" id="modal-credentials-close">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+      Notez-les ou copiez-les maintenant — ce mot de passe ne sera plus jamais réaffiché ensuite.
+    </div>
+    <div class="sa-field" id="cred-code-row" style="display:none;">
+      <label>CODE ENTREPRISE</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-code" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-weight:700;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-code">📋</button>
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>EMAIL</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-email" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-email">📋</button>
+      </div>
+    </div>
+    <div class="sa-field">
+      <label>MOT DE PASSE</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cred-password" readonly style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-weight:700;letter-spacing:0.5px;" />
+        <button class="btn btn-ghost btn-sm" id="cred-copy-password">📋</button>
+      </div>
+    </div>
+    <div class="sa-modal-actions">
+      <button class="btn btn-ghost" id="cred-copy-all">📋 Copier tout</button>
+      <button class="btn btn-primary" id="modal-credentials-done">J'ai noté, fermer</button>
     </div>
   </div>
 </div>
@@ -509,12 +791,31 @@ async function callEdge(fnName, body, jwt = null) {
     method: "POST", headers, body: JSON.stringify(body)
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(data.error || `Erreur ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
+let _sessionExpiredHandled = false;
+function sessionExpired() {
+  if (_sessionExpiredHandled) return;
+  _sessionExpiredHandled = true;
+  clearSession();
+  document.getElementById("screen-app").style.display = "none";
+  document.getElementById("screen-login").style.display = "flex";
+  document.getElementById("login-error").textContent = "⏱️ Session expirée — reconnectez-vous.";
+}
+
 async function api(action, body = {}) {
-  return callEdge("superadmin-api", { action, ...body }, session.jwt);
+  try {
+    return await callEdge("superadmin-api", { action, ...body }, session.jwt);
+  } catch (err) {
+    if (err.status === 401) sessionExpired();
+    throw err;
+  }
 }
 
 // ─── Toast ──────────────────────────────────────────────────────────────
@@ -526,12 +827,156 @@ function toast(msg) {
 
 // ─── Utils ──────────────────────────────────────────────────────────────
 function esc(s) {
-  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric" });
+}
+function formatDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+}
+
+// ─── Export CSV ───────────────────────────────────────────────────────────
+function todayStamp() {
+  return new Date().toISOString().slice(0, 10);
+}
+function downloadCSV(filename, headers, rows) {
+  const csvEsc = (v) => {
+    const s = String(v ?? "");
+    return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = [headers, ...rows].map(row => row.map(csvEsc).join(";"));
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("⬇️ Export téléchargé");
+}
+function exportEntreprisesCSV(rows) {
+  const headers = ["Nom", "Code", "Pack", "Montant/mois (€)", "Statut", "Début contrat", "Fin contrat", "Chauffeurs", "Tracteurs", "Remorques", "Admins", "Contact", "Email contact", "Téléphone contact"];
+  const data = rows.map(e => [
+    e.nom, e.code_entreprise, PACK_LABEL[e.pack] || e.pack || "", montantMensuel(e) ?? "",
+    e.est_active ? "Active" : "Suspendue",
+    e.date_debut_contrat ? formatDate(e.date_debut_contrat) : "",
+    e.date_fin_contrat ? formatDate(e.date_fin_contrat) : "",
+    e.chauffeurs ?? 0, e.tracteurs ?? 0, e.remorques ?? 0, e.admins ?? 0,
+    e.contact_nom || "", e.contact_email || "", e.contact_telephone || "",
+  ]);
+  downloadCSV(`memotruck-entreprises-${todayStamp()}.csv`, headers, data);
+}
+function exportContratsCSV(rows) {
+  const headers = ["Nom", "Statut", "Pack", "Montant/mois (€)", "Début contrat", "Fin contrat", "Situation"];
+  const data = rows.map(e => {
+    const diff = e.date_fin_contrat ? daysDiff(e.date_fin_contrat) : null;
+    const situation = diff === null ? "Sans échéance" : diff < 0 ? `Expiré depuis ${Math.abs(diff)}j` : `Dans ${diff}j`;
+    return [
+      e.nom, e.est_active ? "Active" : "Suspendue", PACK_LABEL[e.pack] || e.pack || "", montantMensuel(e) ?? "",
+      e.date_debut_contrat ? formatDate(e.date_debut_contrat) : "",
+      e.date_fin_contrat ? formatDate(e.date_fin_contrat) : "",
+      situation,
+    ];
+  });
+  downloadCSV(`memotruck-contrats-${todayStamp()}.csv`, headers, data);
+}
+
+// ─── Génération de mot de passe + copie ──────────────────────────────────
+function generatePassword(length = 14) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+  const arr = new Uint32Array(length);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, n => chars[n % chars.length]).join("");
+}
+function copyText(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => toast("📋 Copié")).catch(() => toast("❌ Copie impossible"));
+}
+function attachPasswordGenerator(inputId, genBtnId, copyBtnId) {
+  document.getElementById(genBtnId).addEventListener("click", () => {
+    document.getElementById(inputId).value = generatePassword();
+  });
+  document.getElementById(copyBtnId).addEventListener("click", () => {
+    copyText(document.getElementById(inputId).value);
+  });
+}
+attachPasswordGenerator("modal-admin-password",  "modal-admin-password-gen",  "modal-admin-password-copy");
+attachPasswordGenerator("modal-admin2-password", "modal-admin2-password-gen", "modal-admin2-password-copy");
+attachPasswordGenerator("modal-superadmin-password", "modal-superadmin-password-gen", "modal-superadmin-password-copy");
+
+// ─── Modale identifiants (affichage persistant, ne disparaît pas seul) ───
+function showCredentialsModal({ email, password, code }) {
+  document.getElementById("cred-email").value = email || "";
+  document.getElementById("cred-password").value = password || "";
+  const codeRow = document.getElementById("cred-code-row");
+  if (code) { document.getElementById("cred-code").value = code; codeRow.style.display = "flex"; codeRow.style.flexDirection = "column"; codeRow.style.gap = "6px"; }
+  else { codeRow.style.display = "none"; }
+  document.getElementById("modal-credentials").classList.add("open");
+}
+document.getElementById("modal-credentials-close").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
+document.getElementById("modal-credentials-done").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
+document.getElementById("cred-copy-email").addEventListener("click", () => copyText(document.getElementById("cred-email").value));
+document.getElementById("cred-copy-password").addEventListener("click", () => copyText(document.getElementById("cred-password").value));
+document.getElementById("cred-copy-code").addEventListener("click", () => copyText(document.getElementById("cred-code").value));
+document.getElementById("cred-copy-all").addEventListener("click", () => {
+  const code = document.getElementById("cred-code").value;
+  const lines = [
+    code ? `Code entreprise : ${code}` : null,
+    `Email : ${document.getElementById("cred-email").value}`,
+    `Mot de passe : ${document.getElementById("cred-password").value}`,
+  ].filter(Boolean);
+  copyText(lines.join("\n"));
+});
+
+// ─── Journal d'activité : libellés ────────────────────────────────────────
+const ACTIVITY_LABELS = {
+  create_entreprise:     { icon: "🏢", label: "Entreprise créée",          cls: "badge-green"  },
+  update_entreprise:     { icon: "✏️", label: "Entreprise modifiée",       cls: "badge-blue"   },
+  suspend_entreprise:    { icon: "⛔", label: "Entreprise suspendue",      cls: "badge-red"    },
+  reactivate_entreprise: { icon: "✓",  label: "Entreprise réactivée",      cls: "badge-green"  },
+  delete_entreprise:     { icon: "🗑️", label: "Entreprise supprimée",      cls: "badge-red"    },
+  create_admin:          { icon: "👤", label: "Admin créé",                cls: "badge-blue"   },
+  reset_admin_password:  { icon: "🔑", label: "Mot de passe réinitialisé", cls: "badge-orange" },
+  create_superadmin:     { icon: "🔐", label: "Compte superadmin créé",    cls: "badge-blue"   },
+  delete_superadmin:     { icon: "🚫", label: "Compte superadmin supprimé",cls: "badge-red"    },
+};
+function activityBadge(action) {
+  const a = ACTIVITY_LABELS[action] || { icon: "•", label: action, cls: "badge-blue" };
+  return `<span class="badge ${a.cls}">${a.icon} ${esc(a.label)}</span>`;
+}
+const ACTIVITY_VERB = {
+  create_entreprise:     "a créé",
+  update_entreprise:     "a modifié le contrat de",
+  suspend_entreprise:    "a suspendu",
+  reactivate_entreprise: "a réactivé",
+  delete_entreprise:     "a supprimé",
+  create_admin:          "a ajouté un admin pour",
+  reset_admin_password:  "a réinitialisé le mot de passe d'un admin de",
+  create_superadmin:     "a créé un compte superadmin",
+  delete_superadmin:     "a supprimé un compte superadmin",
+};
+const PERSON_PALETTE = ["#00C2FF", "#9085e9", "#3fd39c", "#e0ab2e"];
+const _personColorMap = {};
+function personColor(email) {
+  if (!_personColorMap[email]) {
+    _personColorMap[email] = PERSON_PALETTE[Object.keys(_personColorMap).length % PERSON_PALETTE.length];
+  }
+  return _personColorMap[email];
+}
+function journalDayLabel(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const startOfDay = dt => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return "Hier";
+  if (diffDays > 1 && diffDays < 7) return cap(d.toLocaleDateString("fr-FR", { weekday: "long" }));
+  return cap(d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }));
 }
 function daysDiff(iso) {
   if (!iso) return null;
@@ -548,6 +993,96 @@ function packBadge(pack) {
   return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${p.max})</span></span>`;
 }
 
+// ─── Prix des packs / calculs budget ─────────────────────────────────────
+const PACK_FIXED_PRICE = { starter: 79, pme: 129, pro: 219 };
+function montantMensuel(e) {
+  if (e.pack === "entreprise") return e.montant_mensuel_personnalise || null;
+  return PACK_FIXED_PRICE[e.pack] ?? null;
+}
+function moisEcoules(dateDebut) {
+  if (!dateDebut) return 0;
+  const d = new Date(dateDebut);
+  const now = new Date();
+  let mois = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+  if (now.getDate() < d.getDate()) mois--;
+  return Math.max(0, mois);
+}
+const PACK_PILL_CLASS = { starter: "pack-pill-starter", pme: "pack-pill-pme", pro: "pack-pill-pro", entreprise: "pack-pill-entreprise" };
+const PACK_LABEL = { starter: "Starter", pme: "PME", pro: "Pro", entreprise: "Entreprise" };
+
+// ─── Avatar monogramme (coloré par pack) ─────────────────────────────────
+function initials(nom) {
+  return String(nom || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?";
+}
+function avatarHTML(nom, pack, sm) {
+  const c = PACK_DONUT_COLOR[pack] || "#8492A6";
+  return `<div class="avatar${sm ? ' avatar-sm' : ''}" style="background:${c}22;color:${c};border:1px solid ${c}44;">${esc(initials(nom))}</div>`;
+}
+
+// ─── Profils véhicules autorisés ────────────────────────────────────────
+// Doit rester synchro avec PROFILS_MOTEUR / PROFILS_REMORQUE / PROFILS_ENGINS
+// dans memotruck-app-dev/js/utils.js (source de vérité côté appli chauffeur).
+const VEHICLE_PROFILE_GROUPS = [
+  { title: "Tracteurs & porteurs", items: [
+    { id: "tracteur_4x2",      label: "Tracteur 4x2" },
+    { id: "tracteur_6x2",      label: "Tracteur 6x2" },
+    { id: "tracteur_6x4",      label: "Tracteur 6x4" },
+    { id: "tracteur_agricole", label: "Tracteur agricole" },
+    { id: "porteur_19t",       label: "Porteur 19t" },
+    { id: "porteur_26t",       label: "Porteur 26t" },
+    { id: "porteur_32t",       label: "Porteur 32t" },
+    { id: "porteur_32t_8x4",   label: "Porteur 32t 8x4" },
+  ]},
+  { title: "Véhicules légers", items: [
+    { id: "voiture_societe", label: "Voiture de société" },
+    { id: "utilitaire",      label: "Utilitaire / Fourgon" },
+  ]},
+  { title: "Remorques", items: [
+    { id: "remorque_1e",   label: "Remorque 1 essieu" },
+    { id: "remorque_2e",   label: "Remorque 2 essieux" },
+    { id: "remorque_3e",   label: "Remorque 3 essieux" },
+    { id: "porte_char_4e", label: "Porte-char 4 essieux" },
+    { id: "porte_char_5e", label: "Porte-char 5 essieux" },
+    { id: "porte_char_6e", label: "Porte-char 6 essieux" },
+  ]},
+  { title: "Engins de chantier", items: [
+    { id: "pelle_hydraulique",   label: "Pelle hydraulique" },
+    { id: "rouleau_compacteur",  label: "Rouleau compacteur" },
+    { id: "bulldozer_chargeuse", label: "Bulldozer / Chargeuse" },
+    { id: "grue_nacelle",        label: "Grue / Nacelle" },
+    { id: "finisseur",           label: "Finisseur" },
+    { id: "alimentateur",        label: "Alimentateur" },
+    { id: "raboteuse",           label: "Raboteuse" },
+  ]},
+];
+const VEHICLE_PROFILE_LABELS = Object.fromEntries(
+  VEHICLE_PROFILE_GROUPS.flatMap(g => g.items).map(it => [it.id, it.label])
+);
+function profilLabel(id) { return VEHICLE_PROFILE_LABELS[id] || id; }
+
+function renderProfilsGridHTML() {
+  return VEHICLE_PROFILE_GROUPS.map(g => `
+    <div class="sa-profils-group">
+      <div class="sa-profils-group-title">${esc(g.title)}</div>
+      <div class="sa-profils-items">
+        ${g.items.map(it => `
+          <label class="sa-profils-item">
+            <input type="checkbox" class="profil-checkbox" value="${it.id}" />
+            ${esc(it.label)}
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+document.getElementById("modal-profils-grid").innerHTML = renderProfilsGridHTML();
+document.getElementById("profils-select-all").addEventListener("click", () => {
+  document.querySelectorAll(".profil-checkbox").forEach(cb => cb.checked = true);
+});
+document.getElementById("profils-select-none").addEventListener("click", () => {
+  document.querySelectorAll(".profil-checkbox").forEach(cb => cb.checked = false);
+});
+
 function contratBadge(iso) {
   if (!iso) return `<span class="badge badge-blue">Sans limite</span>`;
   const diff = daysDiff(iso);
@@ -560,7 +1095,7 @@ function contratBadge(iso) {
 
 // ─── Navigation ─────────────────────────────────────────────────────────
 let currentSection = "dashboard";
-const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats" };
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", superadmins:"Comptes superadmin" };
 function navigateTo(section) {
   currentSection = section;
   document.querySelectorAll(".sa-nav-item").forEach(el => {
@@ -577,64 +1112,373 @@ function render() {
   if (currentSection === "dashboard")   renderDashboard();
   if (currentSection === "entreprises") renderEntreprises();
   if (currentSection === "contrats")    renderContrats();
+  if (currentSection === "journal")     renderJournal();
+  if (currentSection === "superadmins") renderSuperadmins();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// JOURNAL D'ACTIVITÉ
+// ═══════════════════════════════════════════════════════════════════════
+async function renderJournal() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { logs } = await api("list_activity_log", { limit: 150 });
+
+    const byDay = {};
+    const order = [];
+    logs.forEach(l => {
+      const label = journalDayLabel(l.created_at);
+      if (!byDay[label]) { byDay[label] = []; order.push(label); }
+      byDay[label].push(l);
+    });
+
+    main.innerHTML = `
+      <div class="sa-section-title">Journal d'activité</div>
+      ${logs.length === 0
+        ? `<div class="sa-loading">Aucune activité enregistrée pour l'instant</div>`
+        : order.map(day => `
+          <div class="journal-day">
+            <div class="journal-day-lbl">${esc(day)}</div>
+            <div class="journal-card">
+              ${byDay[day].map(l => {
+                const color = personColor(l.superadmin_email);
+                return `
+                <div class="journal-row">
+                  <span class="journal-icon">${(ACTIVITY_LABELS[l.action] || { icon: "•" }).icon}</span>
+                  <div class="journal-body">
+                    <span class="journal-who" style="background:${color}22;color:${color};">${esc(l.superadmin_email.split("@")[0])}</span>
+                    ${ACTIVITY_VERB[l.action] || esc(l.action)}${l.entreprise_nom ? ` <b>${esc(l.entreprise_nom)}</b>` : ""}${l.details ? ` <span style="color:var(--muted);">(${esc(l.details)})</span>` : ""}
+                  </div>
+                  <span class="journal-time">${new Date(l.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+        `).join("")}
+    `;
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+function fmtEUR(n) {
+  return Math.round(n || 0).toLocaleString("fr-FR") + " €";
+}
+function relativeTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const now = new Date();
+  const startOfDay = (dt) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+  if (diffDays === 0) return d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
+  if (diffDays === 1) return "hier";
+  if (diffDays > 1 && diffDays < 7) return d.toLocaleDateString("fr-FR", { weekday: "short" });
+  return formatDate(iso);
+}
+
+function buildMonthBuckets(entreprises) {
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
+    months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: label.charAt(0).toUpperCase() + label.slice(1), count: 0 });
+  }
+  (entreprises || []).forEach(e => {
+    if (!e.created_at) return;
+    const d = new Date(e.created_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const bucket = months.find(m => m.key === key);
+    if (bucket) bucket.count++;
+  });
+  return months;
+}
+
+function buildSparklineSVG(months) {
+  const counts = months.map(m => m.count);
+  const max = Math.max(1, ...counts);
+  const n = months.length;
+  const xs = months.map((_, i) => 10 + i * (210 / (n - 1 || 1)));
+  const ys = counts.map(c => 70 - (c / max) * 60);
+  const pts = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`);
+  const areaPath = `M${pts[0]} L${pts.slice(1).join(" L")} L${xs[n-1].toFixed(1)},70 L${xs[0].toFixed(1)},70 Z`;
+  const circles = months.map((m, i) => {
+    const isLast = i === n - 1;
+    return isLast
+      ? `<g class="spark-pt" data-m="${esc(m.label)}" data-v="${m.count}"><circle cx="${xs[i]}" cy="${ys[i]}" r="7" fill="transparent"/><circle cx="${xs[i]}" cy="${ys[i]}" r="4.5" fill="var(--surface)" stroke="#00C2FF" stroke-width="2"/></g>`
+      : `<g class="spark-pt" data-m="${esc(m.label)}" data-v="${m.count}"><circle cx="${xs[i]}" cy="${ys[i]}" r="7" fill="transparent"/><circle cx="${xs[i]}" cy="${ys[i]}" r="2.5" fill="#00C2FF" opacity="0.55"/></g>`;
+  }).join("");
+  return `
+    <svg class="spark-svg" viewBox="0 0 230 80" preserveAspectRatio="none">
+      <line x1="10" y1="10" x2="220" y2="10" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="10" y1="30" x2="220" y2="30" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="10" y1="50" x2="220" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="10" y1="70" x2="220" y2="70" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+      <defs><linearGradient id="sparkFillGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#00C2FF" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#00C2FF" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${areaPath}" fill="url(#sparkFillGrad)"/>
+      <polyline points="${pts.join(" ")}" fill="none" stroke="#00C2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${circles}
+    </svg>`;
+}
+
+const PACK_DONUT_COLOR = { starter: "#d95926", pme: "#199e70", pro: "#c98500", entreprise: "#d55181" };
+function buildDonutSVG(counts) {
+  const order = ["starter", "pme", "pro", "entreprise"];
+  const total = order.reduce((s, k) => s + (counts[k] || 0), 0) || 1;
+  const r = 45, C = 2 * Math.PI * r;
+  let offset = 0;
+  const segs = order.map(k => {
+    const n = counts[k] || 0;
+    const len = (n / total) * C;
+    const drawn = Math.max(0, len - (n > 0 ? 3 : 0));
+    const seg = `<circle class="donut-seg" cx="56" cy="56" r="${r}" fill="none" stroke="${PACK_DONUT_COLOR[k]}" stroke-width="14" stroke-dasharray="${drawn.toFixed(2)} ${(C - drawn).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" stroke-linecap="round"><title>${PACK_LABEL[k]} — ${n} (${Math.round(n/total*100)}%)</title></circle>`;
+    offset += len;
+    return seg;
+  }).join("");
+  return `
+    <svg class="donut-svg" width="100" height="100" viewBox="0 0 112 112">
+      <g transform="rotate(-90 56 56)">${segs}</g>
+      <text x="56" y="52" text-anchor="middle" class="donut-center-val" fill="var(--text)">${total}</text>
+      <text x="56" y="66" text-anchor="middle" class="donut-center-lbl" fill="var(--muted)">SOCIÉTÉS</text>
+    </svg>`;
+}
+
+function buildWatchlist(entreprises) {
+  const items = [];
+  (entreprises || []).forEach(e => {
+    const diffFin = e.date_fin_contrat ? daysDiff(e.date_fin_contrat) : null;
+    if (!e.est_active) {
+      const days = Math.max(0, Math.floor((Date.now() - new Date(e.updated_at || e.created_at)) / 86400000));
+      items.push({ nom: e.nom, chip: `⛔ suspendue ${days}j`, cls: "watch-chip-danger", prio: 1 });
+    } else if (diffFin !== null && diffFin < 0) {
+      items.push({ nom: e.nom, chip: `⚠️ contrat expiré ${Math.abs(diffFin)}j`, cls: "watch-chip-danger", prio: 2 });
+    } else if ((e.admins || 0) === 0) {
+      items.push({ nom: e.nom, chip: `👤 sans admin actif`, cls: "watch-chip-warning", prio: 3 });
+    } else if (diffFin !== null && diffFin < 15) {
+      items.push({ nom: e.nom, chip: `🕒 contrat ${diffFin}j`, cls: "watch-chip-warning", prio: 4 });
+    }
+  });
+  items.sort((a, b) => a.prio - b.prio);
+  return items.slice(0, 6);
+}
+
 async function renderDashboard() {
   const main = document.getElementById("sa-main");
   try {
-    const { nbEntreprises, nbActives, nbSuspendues, nbChauf, nbTract, nbRemor, contratsAlerte } = await api("list_stats");
+    const [{ nbEntreprises, nbActives, nbSuspendues, nbChauf, nbTract, nbRemor, nbEngins, contratsAlerte },
+           { entreprises },
+           { logs }] = await Promise.all([
+      api("list_stats"),
+      api("list_entreprises"),
+      api("list_activity_log", { limit: 6 }),
+    ]);
 
     // Met à jour le badge contrats
     const badgeC = document.getElementById("badge-contrats");
-    if (contratsAlerte.length > 0) {
-      badgeC.textContent = contratsAlerte.length; badgeC.classList.add("show");
-    } else { badgeC.classList.remove("show"); }
+    if (contratsAlerte.length > 0) { badgeC.textContent = contratsAlerte.length; badgeC.classList.add("show"); }
+    else badgeC.classList.remove("show");
 
-    const alertHTML = contratsAlerte.length > 0 ? `
-      <div class="sa-alert-banner">
-        <div class="sa-alert-title">⚠️ ${contratsAlerte.length} contrat(s) expirant bientôt</div>
-        ${contratsAlerte.map(e => {
-          const diff = daysDiff(e.date_fin_contrat);
-          return `<div class="sa-alert-row" onclick="navigateTo('contrats')">
-            <span class="sa-alert-nom">${esc(e.nom)}</span>
-            <span class="sa-alert-date ${diff < 0 ? 'expired' : ''}">${diff < 0 ? 'Expiré ' + Math.abs(diff) + 'j' : 'Dans ' + diff + ' j'}</span>
-          </div>`;
-        }).join("")}
-      </div>` : "";
+    // ── Budget / MRR ──
+    const rows = entreprises.map(e => {
+      const montant = montantMensuel(e);
+      const mois = moisEcoules(e.date_debut_contrat);
+      return { ...e, montant, facture: montant ? montant * mois : 0 };
+    }).sort((a, b) => (b.montant || 0) - (a.montant || 0));
+
+    const activeRows = rows.filter(r => r.est_active);
+    const mrr = activeRows.reduce((s, r) => s + (r.montant || 0), 0);
+    const totalFacture = rows.reduce((s, r) => s + (r.facture || 0), 0);
+    const nbActifsAvecMontant = activeRows.filter(r => r.montant).length;
+    const avgContract = nbActifsAvecMontant ? Math.round(mrr / nbActifsAvecMontant) : 0;
+    const nbSurDevisSansMontant = rows.filter(r => r.pack === "entreprise" && !r.montant).length;
+
+    const now = new Date();
+    const newThisMonth = entreprises.filter(e => {
+      if (!e.created_at) return false;
+      const d = new Date(e.created_at);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    });
+    const newMRR = newThisMonth.reduce((s, e) => s + (montantMensuel(e) || 0), 0);
+
+    // ── Croissance ──
+    const months = buildMonthBuckets(entreprises);
+    const growthThisMonth = months[months.length - 1].count;
+
+    // ── Répartition packs ──
+    const packCounts = { starter: 0, pme: 0, pro: 0, entreprise: 0 };
+    entreprises.forEach(e => { if (packCounts[e.pack] !== undefined) packCounts[e.pack]++; });
+    const packTotal = entreprises.length || 1;
+
+    // ── Watchlist ──
+    const watchlist = buildWatchlist(entreprises);
+
+    // ── Budget table (top 8) ──
+    const budgetTop = rows.slice(0, 8);
+    const budgetRest = rows.length - budgetTop.length;
 
     main.innerHTML = `
       <div class="sa-section-title">Dashboard</div>
-      ${alertHTML}
-      <div class="sa-stats">
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--accent);">${nbEntreprises}</div>
-          <div class="sa-stat-lbl">ENTREPRISES TOTALES</div>
+
+      <div class="dash-toprow">
+        <div class="dash-search">
+          🔍 <input type="text" id="dash-search-input" placeholder="Rechercher une entreprise, un code, un contact…" />
         </div>
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--success);">${nbActives}</div>
-          <div class="sa-stat-lbl">ACTIVES</div>
+        <button class="btn btn-primary" id="dash-btn-new">+ Nouvelle entreprise</button>
+      </div>
+
+      <div class="dash-hero-row">
+        <div class="dash-hero-mrr">
+          <div class="lbl">Revenu récurrent mensuel</div>
+          <div class="val">${fmtEUR(mrr)}</div>
+          <div class="sub">${entreprises.length} entreprise(s)${newThisMonth.length ? ` · dont ${newThisMonth.length} nouvelle(s) ce mois (+${fmtEUR(newMRR)})` : ""}${nbSurDevisSansMontant ? ` · ${nbSurDevisSansMontant} sur devis (montant non saisi)` : ""}</div>
         </div>
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--danger);">${nbSuspendues}</div>
-          <div class="sa-stat-lbl">SUSPENDUES</div>
+        <div class="sa-stat"><div class="sa-stat-val" style="color:var(--success);">${nbActives} / ${nbEntreprises}</div><div class="sa-stat-lbl">ENTREPRISES ACTIVES</div></div>
+        <div class="sa-stat"><div class="sa-stat-val">${nbChauf}</div><div class="sa-stat-lbl">CHAUFFEURS</div></div>
+        <div class="sa-stat"><div class="sa-stat-val">${nbTract} <span style="color:var(--muted);font-size:15px;">+ ${nbRemor}</span></div><div class="sa-stat-lbl">TRACTEURS + REMORQUES</div><div style="font-size:11px;color:var(--muted-2);margin-top:2px;">${nbEngins} engin(s) BTP</div></div>
+      </div>
+
+      <div class="dash-midrow">
+        <div class="dash-card">
+          <div class="spark-top">
+            <div>
+              <div class="dash-card-title">Nouvelles entreprises</div>
+              <div class="spark-caption">6 derniers mois</div>
+            </div>
+            <div class="spark-val"><span class="plus">+${growthThisMonth}</span> ce mois-ci</div>
+          </div>
+          <div class="spark-wrap">
+            ${buildSparklineSVG(months)}
+            <div class="spark-tip" id="sparkTip"></div>
+          </div>
         </div>
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--text);">${nbChauf}</div>
-          <div class="sa-stat-lbl">CHAUFFEURS</div>
+
+        <div class="dash-card">
+          <div class="dash-card-title">Répartition par pack</div>
+          <div class="donut-body">
+            ${buildDonutSVG(packCounts)}
+            <div class="donut-legend">
+              ${["starter","pme","pro","entreprise"].map(k => `
+                <div class="donut-row">
+                  <span class="donut-dot" style="background:${PACK_DONUT_COLOR[k]}"></span>
+                  <span class="donut-name">${PACK_LABEL[k]}</span>
+                  <span class="donut-pct">${packCounts[k] ? Math.round(packCounts[k]/packTotal*100) : 0}%</span>
+                  <span class="donut-count">${packCounts[k]}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
         </div>
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--text);">${nbTract}</div>
-          <div class="sa-stat-lbl">TRACTEURS</div>
+
+        <div class="dash-card">
+          <div class="dash-card-title">À surveiller <span class="n">${watchlist.length}</span></div>
+          <div>
+            ${watchlist.length
+              ? watchlist.map(w => `<div class="watch-row"><span class="watch-name">${esc(w.nom)}</span><span class="watch-chip ${w.cls}">${w.chip}</span></div>`).join("")
+              : `<div class="watch-empty">Rien à signaler 👍</div>`}
+          </div>
         </div>
-        <div class="sa-stat">
-          <div class="sa-stat-val" style="color:var(--text);">${nbRemor}</div>
-          <div class="sa-stat-lbl">REMORQUES</div>
+      </div>
+
+      <div class="dash-botrow">
+        <div class="dash-card">
+          <div class="dash-card-title">Contrats à surveiller <span class="n">${contratsAlerte.length}</span></div>
+          <div>
+            ${contratsAlerte.length
+              ? contratsAlerte.map(e => {
+                  const diff = daysDiff(e.date_fin_contrat);
+                  return `<div class="sa-alert-row" onclick="navigateTo('contrats')">
+                    <span class="sa-alert-nom">${esc(e.nom)}</span>
+                    <span class="sa-alert-date ${diff < 0 ? 'expired' : ''}">${diff < 0 ? 'Expiré ' + Math.abs(diff) + 'j' : 'Dans ' + diff + 'j'}</span>
+                  </div>`;
+                }).join("")
+              : `<div class="watch-empty">Aucun contrat n'expire dans les 30 prochains jours</div>`}
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-title">Activité récente</div>
+          <div>
+            ${logs.length
+              ? logs.map(l => `
+                <div class="dash-feed-row">
+                  <span class="dash-feed-icon">${(ACTIVITY_LABELS[l.action] || {icon:"•"}).icon}</span>
+                  <div class="dash-feed-body"><b>${esc(l.superadmin_email)}</b> — ${esc((ACTIVITY_LABELS[l.action]||{label:l.action}).label)}${l.entreprise_nom ? ` — <b>${esc(l.entreprise_nom)}</b>` : ""}</div>
+                  <span class="dash-feed-meta">${relativeTime(l.created_at)}</span>
+                </div>
+              `).join("")
+              : `<div class="watch-empty">Aucune activité enregistrée</div>`}
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">💰 Suivi budget — contrats signés</div>
+        <div class="budget-kpis">
+          <div class="budget-kpi"><div class="val">${fmtEUR(totalFacture)}</div><div class="lbl">Facturé depuis le lancement (estim.)</div></div>
+          <div class="budget-kpi"><div class="val">${fmtEUR(mrr)}</div><div class="lbl">Actif ce mois-ci</div></div>
+          <div class="budget-kpi"><div class="val">${fmtEUR(avgContract)}</div><div class="lbl">Valeur moyenne / contrat</div></div>
+        </div>
+        <div class="budget-table-wrap">
+          <table class="budget">
+            <thead>
+              <tr><th>Entreprise</th><th>Pack</th><th>Début contrat</th><th style="text-align:right;">Montant / mois</th><th>Statut</th><th style="text-align:right;">Facturé (cumulé)</th></tr>
+            </thead>
+            <tbody>
+              ${budgetTop.map(r => `
+                <tr>
+                  <td><strong>${esc(r.nom)}</strong></td>
+                  <td><span class="pack-pill ${PACK_PILL_CLASS[r.pack] || ''}">${PACK_LABEL[r.pack] || r.pack || '—'}</span></td>
+                  <td>${formatDate(r.date_debut_contrat)}</td>
+                  <td class="num">${r.montant ? fmtEUR(r.montant) : '—'}</td>
+                  <td><span class="status-pill ${r.est_active ? 'status-pill-active' : 'status-pill-suspended'}">${r.est_active ? 'Active' : 'Suspendue'}</span></td>
+                  <td class="num">${fmtEUR(r.facture)}</td>
+                </tr>
+              `).join("")}
+              ${budgetRest > 0 ? `<tr class="more" onclick="navigateTo('contrats')"><td colspan="6">+ ${budgetRest} autre(s) entreprise(s) — voir Contrats →</td></tr>` : ""}
+              <tr class="total">
+                <td colspan="3">TOTAL — ${entreprises.length} entreprise(s)</td>
+                <td class="num">${fmtEUR(mrr)}</td>
+                <td></td>
+                <td class="num">${fmtEUR(totalFacture)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="budget-note">
+          « Facturé (cumulé) » = mois écoulés depuis le début du contrat × montant mensuel actuel — estimation brute qui ne tient pas compte des changements de pack ni des périodes de suspension. Le pack Entreprise (sur devis) nécessite de saisir un montant mensuel dans la fiche entreprise, sinon il n'est pas compté.
         </div>
       </div>
     `;
+
+    document.getElementById("dash-btn-new").addEventListener("click", () => ouvrirModalEntreprise(null));
+    const searchInput = document.getElementById("dash-search-input");
+    const runDashSearch = () => {
+      _entreprisesSearchTerm = searchInput.value.trim();
+      navigateTo("entreprises");
+    };
+    searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") runDashSearch(); });
+
+    const tip = document.getElementById("sparkTip");
+    const wrap = document.querySelector(".spark-wrap");
+    document.querySelectorAll(".spark-pt").forEach(pt => {
+      pt.addEventListener("mouseenter", () => {
+        const c = pt.querySelector("circle");
+        const rect = c.getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+        tip.textContent = `${pt.dataset.m} — ${pt.dataset.v} nouvelle(s)`;
+        tip.style.left = (rect.left - wrapRect.left + rect.width / 2) + "px";
+        tip.style.top = (rect.top - wrapRect.top) + "px";
+        tip.style.opacity = "1";
+      });
+      pt.addEventListener("mouseleave", () => { tip.style.opacity = "0"; });
+    });
+
   } catch (e) {
     main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
   }
@@ -644,6 +1488,52 @@ async function renderDashboard() {
 // ENTREPRISES
 // ═══════════════════════════════════════════════════════════════════════
 let _entreprises = [];
+let _entreprisesSearchTerm = "";
+let _entSelected = new Set();
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  if (!bar) return;
+  const selected = _entreprises.filter(e => _entSelected.has(e.id));
+  if (selected.length === 0) { bar.innerHTML = ""; return; }
+  const activeSel = selected.filter(e => e.est_active);
+  const suspSel = selected.filter(e => !e.est_active);
+  bar.innerHTML = `
+    <div class="dash-toprow" style="background:var(--card);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:10px 14px;">
+      <div style="font-size:12px;font-weight:700;flex:1;">${selected.length} sélectionnée(s)</div>
+      ${activeSel.length ? `<button class="btn btn-danger btn-sm" id="bulk-suspend">⛔ Suspendre (${activeSel.length})</button>` : ""}
+      ${suspSel.length ? `<button class="btn btn-success btn-sm" id="bulk-reactivate">✓ Réactiver (${suspSel.length})</button>` : ""}
+      <button class="btn btn-ghost btn-sm" id="bulk-clear">✕ Annuler la sélection</button>
+    </div>
+  `;
+  document.getElementById("bulk-clear").addEventListener("click", () => {
+    _entSelected.clear();
+    document.querySelectorAll(".ent-checkbox").forEach(cb => cb.checked = false);
+    updateBulkBar();
+  });
+  const doBulkToggle = async (list, active) => {
+    if (!confirm(`${active ? "Réactiver" : "Suspendre"} ${list.length} entreprise(s) ?\n${list.map(e => e.nom).join(", ")}`)) return;
+    try {
+      await Promise.all(list.map(e => api("toggle_entreprise", { entreprise_id: e.id, est_active: active })));
+      toast(active ? "✅ Entreprises réactivées" : "⛔ Entreprises suspendues");
+      _entSelected.clear();
+      renderEntreprises();
+    } catch (err) { toast("❌ " + err.message); }
+  };
+  document.getElementById("bulk-suspend")?.addEventListener("click", () => doBulkToggle(activeSel, false));
+  document.getElementById("bulk-reactivate")?.addEventListener("click", () => doBulkToggle(suspSel, true));
+}
+
+function filterEntreprises(entreprises, term) {
+  if (!term) return entreprises;
+  const t = term.toLowerCase();
+  return entreprises.filter(e =>
+    (e.nom || "").toLowerCase().includes(t) ||
+    (e.code_entreprise || "").toLowerCase().includes(t) ||
+    (e.contact_nom || "").toLowerCase().includes(t) ||
+    (e.contact_email || "").toLowerCase().includes(t)
+  );
+}
 
 async function renderEntreprises() {
   const main = document.getElementById("sa-main");
@@ -656,59 +1546,67 @@ async function renderEntreprises() {
     if (suspended > 0) { badge.textContent = suspended; badge.classList.add("show"); }
     else badge.classList.remove("show");
 
+    const filtered = filterEntreprises(entreprises, _entreprisesSearchTerm);
+
     main.innerHTML = `
-      <div class="sa-section-title">Entreprises (${entreprises.length})</div>
-      <div class="sa-table-wrap">
-        <div class="sa-table-header">
-          <h3>Toutes les entreprises</h3>
-          <div class="sa-table-header-right">
-            <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
-          </div>
+      <div class="sa-section-title">Entreprises (${filtered.length}${_entreprisesSearchTerm ? ` / ${entreprises.length}` : ""})</div>
+      <div class="dash-toprow">
+        <div class="dash-search">
+          🔍 <input type="text" id="entreprises-search-input" placeholder="Rechercher une entreprise, un code, un contact… (Entrée pour filtrer)" value="${esc(_entreprisesSearchTerm)}" />
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ENTREPRISE</th><th>CODE</th><th>PACK</th><th>STATUT</th>
-              <th>FIN CONTRAT</th><th>CHAUFFEURS</th><th>TRACTEURS</th>
-              <th>ADMINS</th><th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${entreprises.map(e => `
-              <tr>
-                <td>
-                  <div style="font-weight:700;color:var(--text);">${esc(e.nom)}</div>
-                  ${e.contact_nom ? `<div style="font-size:11px;color:var(--muted);">${esc(e.contact_nom)}</div>` : ""}
-                </td>
-                <td><span class="badge badge-blue">${esc(e.code_entreprise)}</span></td>
-                <td>${packBadge(e.pack)}</td>
-                <td>
-                  ${e.est_active
-                    ? `<span class="badge badge-green">✓ Active</span>`
-                    : `<span class="badge badge-red">⛔ Suspendue</span>`}</td>
-                <td>${contratBadge(e.date_fin_contrat)}</td>
-                <td style="text-align:center;">${e.chauffeurs}</td>
-                <td style="text-align:center;">${e.tracteurs}</td>
-                <td style="text-align:center;">${e.admins}</td>
-                <td>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button class="btn btn-ghost btn-sm" data-detail="${e.id}">👁️</button>
-                    <button class="btn btn-ghost btn-sm" data-edit="${e.id}">✏️</button>
-                    ${e.est_active
-                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
-                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
-                    <button class="btn btn-sm" data-delete="${e.id}" data-nom="${e.nom}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
+        ${_entreprisesSearchTerm ? `<button class="btn btn-ghost" id="btn-clear-search">✕ Effacer</button>` : ""}
+        <button class="btn btn-ghost" id="btn-export-entreprises">⬇️ Export CSV</button>
+        <button class="btn btn-primary" id="btn-new-entreprise">+ Nouvelle entreprise</button>
+      </div>
+      <div id="bulk-bar"></div>
+      <div class="ent-table-wrap">
+        ${filtered.length === 0
+          ? `<div style="text-align:center;color:var(--muted);padding:24px;">Aucune entreprise ne correspond à « ${esc(_entreprisesSearchTerm)} »</div>`
+          : filtered.map(e => `
+            <div class="ent-row">
+              <input type="checkbox" class="ent-checkbox" data-id="${e.id}" ${_entSelected.has(e.id) ? 'checked' : ''} />
+              ${avatarHTML(e.nom, e.pack)}
+              <div style="flex:1;min-width:160px;">
+                <div class="ent-name">${esc(e.nom)}</div>
+                <div class="ent-sub">${e.contact_nom ? esc(e.contact_nom) : esc(e.code_entreprise)}</div>
+              </div>
+              <div class="ent-col"><span class="pack-pill ${PACK_PILL_CLASS[e.pack] || ''}">${esc(PACK_LABEL[e.pack] || e.pack || '—')}</span></div>
+              <div class="ent-col"><span class="status-pill ${e.est_active ? 'status-pill-active' : 'status-pill-suspended'}">${e.est_active ? 'Active' : 'Suspendue'}</span></div>
+              <div class="ent-col">${contratBadge(e.date_fin_contrat)}</div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.chauffeurs}</div><div class="ent-num-lbl">Chauf.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.tracteurs}</div><div class="ent-num-lbl">Tract.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.admins}</div><div class="ent-num-lbl">Admins</div></div>
+              <div class="ent-actions">
+                <button class="btn btn-ghost btn-sm btn-icon" data-detail="${e.id}" title="Détail">👁️</button>
+                <button class="btn btn-ghost btn-sm btn-icon" data-edit="${e.id}" title="Modifier">✏️</button>
+                ${e.est_active
+                  ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+                  : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+                <button class="btn btn-sm btn-icon" data-delete="${e.id}" data-nom="${esc(e.nom)}" title="Supprimer" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️</button>
+              </div>
+            </div>
+          `).join("")}
       </div>
       <div id="detail-zone"></div>
     `;
 
     document.getElementById("btn-new-entreprise").addEventListener("click", () => ouvrirModalEntreprise(null));
+    document.getElementById("btn-export-entreprises").addEventListener("click", () => exportEntreprisesCSV(filtered));
+    const searchInput = document.getElementById("entreprises-search-input");
+    searchInput.addEventListener("input", () => { _entreprisesSearchTerm = searchInput.value; });
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { _entreprisesSearchTerm = searchInput.value.trim(); renderEntreprises(); }
+    });
+    if (_entreprisesSearchTerm) searchInput.focus();
+    document.getElementById("btn-clear-search")?.addEventListener("click", () => { _entreprisesSearchTerm = ""; renderEntreprises(); });
+
+    document.querySelectorAll(".ent-checkbox").forEach(cb => {
+      cb.addEventListener("change", () => {
+        if (cb.checked) _entSelected.add(cb.dataset.id); else _entSelected.delete(cb.dataset.id);
+        updateBulkBar();
+      });
+    });
+    updateBulkBar();
 
     // Détail
     document.querySelectorAll("[data-detail]").forEach(btn => {
@@ -777,14 +1675,26 @@ async function afficherDetailEntreprise(id) {
         </div>
 
         <div>
+          <div class="detail-section-title">VÉHICULES AUTORISÉS (${(e.profils_autorises||[]).length})</div>
+          <div class="sa-profils-badges">
+            ${(e.profils_autorises||[]).length
+              ? e.profils_autorises.map(id => `<span class="sa-profils-badge">${esc(profilLabel(id))}</span>`).join("")
+              : `<span style="font-size:12px;color:var(--muted);">Aucun — l'entreprise ne peut ajouter aucun véhicule</span>`}
+          </div>
+        </div>
+
+        <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div class="detail-section-title" style="margin:0;">ADMINS (${admins.length})</div>
-            <button class="btn btn-primary btn-sm" id="btn-add-admin" data-entreprise="${id}">+ Admin</button>
+            <button class="btn btn-primary btn-sm" id="btn-add-admin" data-entreprise="${id}" data-panel-mecano="${!!e.panel_mecano_actif}">+ Admin</button>
           </div>
           ${admins.map(a => `
             <div class="detail-row">
-              <span class="detail-label">${esc(a.prenom)} ${esc(a.nom)}</span>
-              <span class="detail-val" style="font-size:11px;">${esc(a.email)}</span>
+              <span class="detail-label">${esc(a.prenom)} ${esc(a.nom)} ${a.role === "mecanicien" ? `<span class="badge badge-blue" style="margin-left:6px;">🔧 Mécanicien</span>` : ""}</span>
+              <span class="detail-val" style="font-size:11px;display:flex;align-items:center;gap:8px;">
+                ${esc(a.email)}
+                <button class="btn btn-ghost btn-sm" data-reset-admin="${a.id}" data-reset-email="${esc(a.email)}" title="Réinitialiser le mot de passe">🔑</button>
+              </span>
             </div>
           `).join("") || `<div style="font-size:12px;color:var(--muted);">Aucun admin</div>`}
         </div>
@@ -794,7 +1704,21 @@ async function afficherDetailEntreprise(id) {
     `;
 
     document.getElementById("btn-add-admin")?.addEventListener("click", (ev) => {
-      ouvrirModalAdmin(ev.currentTarget.dataset.entreprise);
+      ouvrirModalAdmin(ev.currentTarget.dataset.entreprise, ev.currentTarget.dataset.panelMecano === "true");
+    });
+
+    zone.querySelectorAll("[data-reset-admin]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const adminId = btn.dataset.resetAdmin;
+        const email   = btn.dataset.resetEmail;
+        if (!confirm(`Générer un nouveau mot de passe pour ${email} ?\nL'ancien ne fonctionnera plus.`)) return;
+        const password = generatePassword();
+        try {
+          await api("reset_admin_password", { admin_id: adminId, password });
+          toast("✅ Mot de passe réinitialisé");
+          showCredentialsModal({ email, password });
+        } catch (err) { toast("❌ " + err.message); }
+      });
     });
 
   } catch (err) {
@@ -805,72 +1729,75 @@ async function afficherDetailEntreprise(id) {
 // ═══════════════════════════════════════════════════════════════════════
 // CONTRATS
 // ═══════════════════════════════════════════════════════════════════════
+function contratTriageRow(e) {
+  const diff = e.date_fin_contrat ? daysDiff(e.date_fin_contrat) : null;
+  const dates = e.date_fin_contrat
+    ? (diff < 0 ? `expiré depuis ${Math.abs(diff)}j` : `échéance dans ${diff}j`)
+    : (e.date_debut_contrat ? `depuis le ${formatDate(e.date_debut_contrat)}` : "—");
+  return `
+    <div class="triage-row">
+      ${avatarHTML(e.nom, e.pack, true)}
+      <div class="triage-name">${esc(e.nom)}</div>
+      <div class="triage-dates">${dates}</div>
+      ${contratBadge(e.date_fin_contrat)}
+      <button class="btn btn-ghost btn-sm" data-edit-contrat="${e.id}">✏️ Modifier</button>
+      ${e.est_active
+        ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
+        : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
+    </div>`;
+}
+
 async function renderContrats() {
   const main = document.getElementById("sa-main");
   try {
     const { entreprises } = await api("list_entreprises");
-    const sorted = [...entreprises].sort((a, b) => {
-      if (!a.date_fin_contrat) return 1;
-      if (!b.date_fin_contrat) return -1;
-      return new Date(a.date_fin_contrat) - new Date(b.date_fin_contrat);
-    });
 
-    const enAlerte = sorted.filter(e => {
-      if (!e.date_fin_contrat) return false;
-      return daysDiff(e.date_fin_contrat) < 30;
-    });
-
+    const enAlerte = entreprises.filter(e => e.date_fin_contrat && daysDiff(e.date_fin_contrat) < 30);
     const badgeC = document.getElementById("badge-contrats");
     if (enAlerte.length > 0) { badgeC.textContent = enAlerte.length; badgeC.classList.add("show"); }
     else badgeC.classList.remove("show");
 
+    const withDate = entreprises.filter(e => e.date_fin_contrat);
+    const groups = [
+      { label: "Expirés", color: "var(--danger)", items: withDate.filter(e => daysDiff(e.date_fin_contrat) < 0) },
+      { label: "Cette semaine (< 15j)", color: "var(--danger)", items: withDate.filter(e => { const d = daysDiff(e.date_fin_contrat); return d >= 0 && d < 15; }) },
+      { label: "Ce mois (< 30j)", color: "var(--warning)", items: withDate.filter(e => { const d = daysDiff(e.date_fin_contrat); return d >= 15 && d < 30; }) },
+      { label: "Au-delà", color: "var(--muted-2)", items: withDate.filter(e => daysDiff(e.date_fin_contrat) >= 30) },
+      { label: "Sans échéance définie", color: "var(--muted-2)", items: entreprises.filter(e => !e.date_fin_contrat) },
+    ];
+    // Trie chaque groupe par échéance croissante (les plus urgents en premier)
+    groups.forEach(g => g.items.sort((a, b) => {
+      if (!a.date_fin_contrat) return 1;
+      if (!b.date_fin_contrat) return -1;
+      return new Date(a.date_fin_contrat) - new Date(b.date_fin_contrat);
+    }));
+
     main.innerHTML = `
       <div class="sa-section-title">Suivi des contrats</div>
-      <div class="sa-table-wrap">
-        <div class="sa-table-header"><h3>Tous les contrats</h3></div>
-        <table>
-          <thead>
-            <tr><th>ENTREPRISE</th><th>STATUT</th><th>DÉBUT</th><th>FIN CONTRAT</th><th>ALERTE</th><th>ACTIONS</th></tr>
-          </thead>
-          <tbody>
-            ${sorted.map(e => {
-              const diff = daysDiff(e.date_fin_contrat);
-              let alerteHTML = `<span style="color:var(--muted);font-size:11px;">OK</span>`;
-              if (diff !== null && diff < 0)  alerteHTML = `<span class="badge badge-red">⚠️ Expiré depuis ${Math.abs(diff)}j</span>`;
-              else if (diff !== null && diff < 15) alerteHTML = `<span class="badge badge-red">🔴 Dans ${diff}j</span>`;
-              else if (diff !== null && diff < 30) alerteHTML = `<span class="badge badge-orange">🟠 Dans ${diff}j</span>`;
-              else if (diff !== null && diff < 60) alerteHTML = `<span class="badge badge-yellow">🟡 Dans ${diff}j</span>`;
-              return `<tr>
-                <td><strong>${esc(e.nom)}</strong></td>
-                <td>${e.est_active ? `<span class="badge badge-green">Active</span>` : `<span class="badge badge-red">Suspendue</span>`}</td>
-                <td>${formatDate(e.date_debut_contrat)}</td>
-                <td>${formatDate(e.date_fin_contrat)}</td>
-                <td>${alerteHTML}</td>
-                <td>
-                  <div style="display:flex;gap:6px;">
-                    <button class="btn btn-ghost btn-sm" data-edit-contrat="${e.id}">✏️ Modifier</button>
-                    ${e.est_active
-                      ? `<button class="btn btn-danger btn-sm" data-toggle="${e.id}" data-active="false">⛔ Suspendre</button>`
-                      : `<button class="btn btn-success btn-sm" data-toggle="${e.id}" data-active="true">✓ Réactiver</button>`}
-                  </div>
-                </td>
-              </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
+      <div class="dash-toprow" style="justify-content:flex-end;">
+        <button class="btn btn-ghost" id="btn-export-contrats">⬇️ Export CSV</button>
       </div>
+      ${groups.filter(g => g.items.length).map(g => `
+        <div class="triage-group">
+          <div class="triage-head"><span class="dot" style="background:${g.color};"></span><h3>${g.label}</h3><span class="n">${g.items.length}</span></div>
+          <div class="triage-card">
+            ${g.items.map(contratTriageRow).join("")}
+          </div>
+        </div>
+      `).join("") || `<div class="sa-loading">Aucune entreprise</div>`}
     `;
 
+    document.getElementById("btn-export-contrats").addEventListener("click", () => exportContratsCSV(entreprises));
     document.querySelectorAll("[data-edit-contrat]").forEach(btn => {
       btn.addEventListener("click", () => {
-        const e = sorted.find(x => x.id === btn.dataset.editContrat);
+        const e = entreprises.find(x => x.id === btn.dataset.editContrat);
         if (e) ouvrirModalEntreprise(e);
       });
     });
     document.querySelectorAll("[data-toggle]").forEach(btn => {
       btn.addEventListener("click", async () => {
         const active = btn.dataset.active === "true";
-        const e = sorted.find(x => x.id === btn.dataset.toggle);
+        const e = entreprises.find(x => x.id === btn.dataset.toggle);
         if (!e || !confirm(`${active ? "Réactiver" : "Suspendre"} "${e.nom}" ?`)) return;
         try {
           await api("toggle_entreprise", { entreprise_id: btn.dataset.toggle, est_active: active });
@@ -903,20 +1830,31 @@ function ouvrirModalEntreprise(entreprise) {
 
   document.getElementById("modal-nom").value            = entreprise?.nom || "";
   document.getElementById("modal-pack").value           = entreprise?.pack || "starter";
+  document.getElementById("modal-montant-perso").value  = entreprise?.montant_mensuel_personnalise || "";
+  toggleMontantPersoField();
   document.getElementById("modal-debut").value          = entreprise?.date_debut_contrat || "";
   document.getElementById("modal-fin").value            = entreprise?.date_fin_contrat || "";
   document.getElementById("modal-contact-nom").value    = entreprise?.contact_nom || "";
   document.getElementById("modal-contact-email").value  = entreprise?.contact_email || "";
   document.getElementById("modal-contact-tel").value    = entreprise?.contact_telephone || "";
   document.getElementById("modal-notes").value          = entreprise?.notes || "";
+  const autorises = entreprise?.profils_autorises || [];
+  document.querySelectorAll(".profil-checkbox").forEach(cb => { cb.checked = autorises.includes(cb.value); });
+  document.getElementById("modal-panel-mecano").checked = !!entreprise?.panel_mecano_actif;
   document.getElementById("modal-admin-prenom").value   = "";
   document.getElementById("modal-admin-nom").value      = "";
   document.getElementById("modal-admin-email").value    = "";
-  document.getElementById("modal-admin-password").value = "";
+  document.getElementById("modal-admin-password").value = isEdit ? "" : generatePassword();
   document.getElementById("modal-entreprise-error").textContent = "";
 
   document.getElementById("modal-entreprise").classList.add("open");
 }
+
+function toggleMontantPersoField() {
+  const isEntreprise = document.getElementById("modal-pack").value === "entreprise";
+  document.getElementById("modal-montant-perso-row").style.display = isEntreprise ? "flex" : "none";
+}
+document.getElementById("modal-pack").addEventListener("change", toggleMontantPersoField);
 
 document.getElementById("modal-entreprise-close").addEventListener("click",  () => document.getElementById("modal-entreprise").classList.remove("open"));
 document.getElementById("modal-entreprise-cancel").addEventListener("click", () => document.getElementById("modal-entreprise").classList.remove("open"));
@@ -936,6 +1874,9 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
     contact_email:       document.getElementById("modal-contact-email").value.trim() || null,
     contact_telephone:   document.getElementById("modal-contact-tel").value.trim() || null,
     notes:               document.getElementById("modal-notes").value.trim() || null,
+    profils_autorises:   Array.from(document.querySelectorAll(".profil-checkbox:checked")).map(cb => cb.value),
+    montant_mensuel_personnalise: document.getElementById("modal-montant-perso").value || null,
+    panel_mecano_actif:  document.getElementById("modal-panel-mecano").checked,
   };
 
   try {
@@ -949,6 +1890,10 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
       payload.admin_password = document.getElementById("modal-admin-password").value;
       const res = await api("create_entreprise", payload);
       toast(`✅ Entreprise créée — Code : ${res.code_entreprise}`);
+      document.getElementById("modal-entreprise").classList.remove("open");
+      render();
+      showCredentialsModal({ email: payload.admin_email, password: payload.admin_password, code: res.code_entreprise });
+      return;
     }
     document.getElementById("modal-entreprise").classList.remove("open");
     render();
@@ -965,12 +1910,14 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
 // ═══════════════════════════════════════════════════════════════════════
 let _adminEntrepriseId = null;
 
-function ouvrirModalAdmin(entrepriseId) {
+function ouvrirModalAdmin(entrepriseId, panelMecanoActif) {
   _adminEntrepriseId = entrepriseId;
   document.getElementById("modal-admin2-prenom").value   = "";
   document.getElementById("modal-admin2-nom").value      = "";
   document.getElementById("modal-admin2-email").value    = "";
-  document.getElementById("modal-admin2-password").value = "";
+  document.getElementById("modal-admin2-password").value = generatePassword();
+  document.getElementById("modal-admin2-role").value     = "exploitation";
+  document.getElementById("modal-admin2-role-row").style.display = panelMecanoActif ? "block" : "none";
   document.getElementById("modal-admin-error").textContent = "";
   document.getElementById("modal-admin").classList.add("open");
 }
@@ -983,22 +1930,102 @@ document.getElementById("modal-admin-save").addEventListener("click", async () =
   const btn   = document.getElementById("modal-admin-save");
   errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
   try {
+    const email    = document.getElementById("modal-admin2-email").value.trim();
+    const password = document.getElementById("modal-admin2-password").value;
+    const roleRowVisible = document.getElementById("modal-admin2-role-row").style.display !== "none";
     await api("create_admin", {
       entreprise_id: _adminEntrepriseId,
       prenom:   document.getElementById("modal-admin2-prenom").value.trim(),
       nom:      document.getElementById("modal-admin2-nom").value.trim(),
-      email:    document.getElementById("modal-admin2-email").value.trim(),
-      password: document.getElementById("modal-admin2-password").value,
+      email,
+      password,
+      role: roleRowVisible ? document.getElementById("modal-admin2-role").value : "exploitation",
     });
     toast("✅ Admin créé");
     document.getElementById("modal-admin").classList.remove("open");
     if (currentSection === "entreprises") render();
+    showCredentialsModal({ email, password });
   } catch (err) {
     errEl.textContent = "❌ " + err.message;
   } finally {
     btn.disabled = false; btn.textContent = "✓ Créer";
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPTES SUPERADMIN
+// ═══════════════════════════════════════════════════════════════════════
+function ouvrirModalSuperadmin() {
+  document.getElementById("modal-superadmin-email").value    = "";
+  document.getElementById("modal-superadmin-password").value = generatePassword();
+  document.getElementById("modal-superadmin-error").textContent = "";
+  document.getElementById("modal-superadmin").classList.add("open");
+}
+
+document.getElementById("modal-superadmin-close").addEventListener("click",  () => document.getElementById("modal-superadmin").classList.remove("open"));
+document.getElementById("modal-superadmin-cancel").addEventListener("click", () => document.getElementById("modal-superadmin").classList.remove("open"));
+
+document.getElementById("modal-superadmin-save").addEventListener("click", async () => {
+  const errEl = document.getElementById("modal-superadmin-error");
+  const btn   = document.getElementById("modal-superadmin-save");
+  errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
+  try {
+    const email    = document.getElementById("modal-superadmin-email").value.trim();
+    const password = document.getElementById("modal-superadmin-password").value;
+    if (!email) { errEl.textContent = "❌ Email requis"; return; }
+    await api("create_superadmin", { email, password });
+    toast("✅ Compte superadmin créé");
+    document.getElementById("modal-superadmin").classList.remove("open");
+    renderSuperadmins();
+    showCredentialsModal({ email, password });
+  } catch (err) {
+    errEl.textContent = "❌ " + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "✓ Créer";
+  }
+});
+
+async function renderSuperadmins() {
+  const main = document.getElementById("sa-main");
+  try {
+    const { superadmins } = await api("list_superadmins");
+    main.innerHTML = `
+      <div class="sa-section-title">Comptes superadmin (${superadmins.length})</div>
+      <div class="dash-toprow" style="justify-content:flex-end;">
+        <button class="btn btn-primary" id="btn-new-superadmin">+ Ajouter un compte</button>
+      </div>
+      <div class="ent-table-wrap">
+        ${superadmins.map(s => `
+          <div class="ent-row">
+            <div class="avatar" style="background:rgba(0,194,255,0.13);color:var(--accent);border:1px solid rgba(0,194,255,0.3);">${esc(initials(s.email.split("@")[0]))}</div>
+            <div style="flex:1;min-width:160px;">
+              <div class="ent-name">${esc(s.email)} ${s.id === session.superadmin_id ? '<span class="badge badge-blue" style="margin-left:6px;">Vous</span>' : ''}</div>
+              <div class="ent-sub">Créé le ${formatDate(s.created_at)}</div>
+            </div>
+            <div class="ent-actions">
+              ${s.id === session.superadmin_id ? '' : `<button class="btn btn-sm" data-delete-superadmin="${s.id}" data-email="${esc(s.email)}" style="background:rgba(239,83,80,0.08);color:var(--danger);border:1px solid rgba(239,83,80,0.2);">🗑️ Supprimer</button>`}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    document.getElementById("btn-new-superadmin").addEventListener("click", ouvrirModalSuperadmin);
+    document.querySelectorAll("[data-delete-superadmin]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.deleteSuperadmin;
+        const email = btn.dataset.email;
+        if (!confirm(`Supprimer définitivement le compte superadmin "${email}" ?\nCette personne ne pourra plus se connecter.`)) return;
+        try {
+          await api("delete_superadmin", { superadmin_id: id });
+          toast("✅ Compte supprimé");
+          renderSuperadmins();
+        } catch (err) { toast("❌ " + err.message); }
+      });
+    });
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // SUPPRESSION ENTREPRISE
@@ -1063,6 +2090,7 @@ document.getElementById("btn-login").addEventListener("click", async () => {
   try {
     const data = await callEdge("superadmin-login", { email, password });
     saveSession(data);
+    _sessionExpiredHandled = false;
     document.getElementById("sa-user-email").textContent = data.email;
     showApp();
   } catch (err) {
