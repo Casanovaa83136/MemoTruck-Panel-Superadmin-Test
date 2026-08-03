@@ -548,6 +548,10 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <span class="sa-badge" id="badge-contrats">0</span>
     </div>
     <div class="sa-nav-item" data-section="journal">🕒 Journal d'activité</div>
+    <div class="sa-nav-item" data-section="erreurs">
+      🐛 Erreurs
+      <span class="sa-badge" id="badge-erreurs">0</span>
+    </div>
     <div class="sa-nav-item" data-section="superadmins">🔐 Comptes superadmin</div>
 
     <div class="sa-sidebar-footer">
@@ -809,6 +813,27 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 
 <script>
 const SUPABASE_URL = "https://ztlxxrywxxflqvigwncb.supabase.co";
+
+// ─── Monitoring erreurs client ─────────────────────────────────────────
+// Best-effort : ne doit jamais bloquer ni ralentir l'app si le logging échoue.
+(function () {
+  const MAX_ERRORS = 8;
+  let sent = 0;
+  function report(message, stack) {
+    if (sent >= MAX_ERRORS || !message) return;
+    sent++;
+    try {
+      fetch(`${SUPABASE_URL}/functions/v1/log-client-error`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app: "superadmin", message: String(message).slice(0, 2000), stack: stack ? String(stack).slice(0, 4000) : null, url: location.href }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  }
+  window.addEventListener("error", (e) => report(e.message, e.error && e.error.stack));
+  window.addEventListener("unhandledrejection", (e) => report(e.reason && e.reason.message ? e.reason.message : String(e.reason), e.reason && e.reason.stack));
+})();
 const STORAGE_KEY  = "memotruck_superadmin_session";
 
 // ─── Session ────────────────────────────────────────────────────────────
@@ -1140,7 +1165,7 @@ function contratBadge(iso) {
 
 // ─── Navigation ─────────────────────────────────────────────────────────
 let currentSection = "dashboard";
-const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", superadmins:"Comptes superadmin" };
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", erreurs:"Erreurs applicatives", superadmins:"Comptes superadmin" };
 function navigateTo(section) {
   currentSection = section;
   document.querySelectorAll(".sa-nav-item").forEach(el => {
@@ -1169,6 +1194,7 @@ function render() {
   if (currentSection === "entreprises") renderEntreprises();
   if (currentSection === "contrats")    renderContrats();
   if (currentSection === "journal")     renderJournal();
+  if (currentSection === "erreurs")     renderErreurs();
   if (currentSection === "superadmins") renderSuperadmins();
 }
 
@@ -1208,6 +1234,61 @@ async function renderJournal() {
                   <span class="journal-time">${new Date(l.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                 </div>`;
               }).join("")}
+            </div>
+          </div>
+        `).join("")}
+    `;
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
+
+const APP_LABEL = { pwa: "📱 PWA chauffeur", admin: "🖥️ Panel bureau/atelier", superadmin: "🛠️ Panel superadmin" };
+const APP_COLOR = { pwa: "#00C2FF", admin: "#F59E0B", superadmin: "#A78BFA" };
+
+async function renderErreurs() {
+  const main = document.getElementById("sa-main");
+  try {
+    const [{ errors, last24h }, { entreprises }] = await Promise.all([
+      api("list_client_errors", { limit: 150 }),
+      api("list_entreprises"),
+    ]);
+
+    const badgeE = document.getElementById("badge-erreurs");
+    if (last24h > 0) { badgeE.textContent = last24h; badgeE.classList.add("show"); }
+    else badgeE.classList.remove("show");
+
+    const entMap = {};
+    (entreprises || []).forEach(e => { entMap[e.id] = e.nom; });
+
+    const byDay = {};
+    const order = [];
+    errors.forEach(err => {
+      const label = journalDayLabel(err.created_at);
+      if (!byDay[label]) { byDay[label] = []; order.push(label); }
+      byDay[label].push(err);
+    });
+
+    main.innerHTML = `
+      <div class="sa-section-title">Erreurs applicatives <span style="font-size:12px;font-weight:600;color:var(--muted);">— ${last24h} dans les dernières 24h</span></div>
+      ${errors.length === 0
+        ? `<div class="sa-loading">Aucune erreur remontée pour l'instant 👍</div>`
+        : order.map(day => `
+          <div class="journal-day">
+            <div class="journal-day-lbl">${esc(day)}</div>
+            <div class="journal-card">
+              ${byDay[day].map(err => `
+                <div class="journal-row" style="align-items:flex-start;">
+                  <span class="journal-icon" style="color:${APP_COLOR[err.app] || 'var(--muted)'};">🐛</span>
+                  <div class="journal-body">
+                    <span class="journal-who" style="background:${(APP_COLOR[err.app]||'#888')}22;color:${APP_COLOR[err.app]||'var(--muted)'};">${esc(APP_LABEL[err.app] || err.app)}</span>
+                    ${err.entreprise_id ? ` <b>${esc(entMap[err.entreprise_id] || err.entreprise_id)}</b>` : ""}
+                    <div style="margin-top:4px;font-family:var(--mono);font-size:11.5px;color:var(--text);word-break:break-word;">${esc(err.message)}</div>
+                    ${err.url ? `<div style="margin-top:2px;font-size:10.5px;color:var(--muted);word-break:break-all;">${esc(err.url)}</div>` : ""}
+                  </div>
+                  <span class="journal-time">${new Date(err.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              `).join("")}
             </div>
           </div>
         `).join("")}
