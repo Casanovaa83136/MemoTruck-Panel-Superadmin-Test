@@ -35,7 +35,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 
 /* ── LOGIN ── */
 #screen-login{width:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.09) 0%,var(--bg) 65%)}
-.login-box{width:380px;display:flex;flex-direction:column;gap:22px}
+.login-box{width:380px;max-width:92vw;display:flex;flex-direction:column;gap:22px}
 .login-card{
   background:var(--surface);border:1px solid rgba(0,194,255,0.15);
   border-radius:20px;padding:30px;
@@ -68,6 +68,36 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
   width:var(--sidebar);flex-shrink:0;
   background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;
+  transition:transform 0.25s ease;
+}
+
+/* ── MOBILE TOPBAR (masquée en desktop, réutilise .sa-topbar/.sa-topbar-title) ── */
+.sa-topbar{display:none}
+.sa-hamburger{
+  background:none;border:none;color:var(--text);font-size:22px;line-height:1;
+  cursor:pointer;padding:6px 8px;border-radius:var(--radius-sm);flex-shrink:0;
+}
+.sa-hamburger:hover{background:rgba(255,255,255,0.06)}
+.sa-mobile-backdrop{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:190;
+}
+.sa-mobile-backdrop.show{display:block}
+
+@media (max-width:860px){
+  #screen-app{flex-direction:column}
+  .sa-topbar{display:flex;align-items:center;gap:12px}
+  .sa-sidebar{
+    position:fixed;top:0;left:0;bottom:0;z-index:200;
+    width:min(78vw,260px);
+    transform:translateX(-100%);
+    box-shadow:0 0 40px rgba(0,0,0,0.5);
+  }
+  .sa-sidebar.open{transform:translateX(0)}
+  .sa-main{padding:16px}
+  .sa-field-row{flex-direction:column}
+}
+@media (max-width:480px){
+  .sa-modal{padding:18px}
 }
 .sa-logo-wrap{
   padding:18px 16px 14px;border-bottom:1px solid var(--border);
@@ -491,8 +521,15 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 <!-- ════ ÉCRAN APP ════ -->
 <div id="screen-app">
 
+  <!-- TOPBAR MOBILE (masquée en desktop) -->
+  <div class="sa-topbar">
+    <button class="sa-hamburger" id="btn-mobile-menu" aria-label="Menu">☰</button>
+    <div class="sa-topbar-title" id="sa-topbar-title">Dashboard</div>
+  </div>
+  <div class="sa-mobile-backdrop" id="sa-mobile-backdrop"></div>
+
   <!-- SIDEBAR -->
-  <div class="sa-sidebar">
+  <div class="sa-sidebar" id="sa-sidebar">
     <div class="sa-logo-wrap">
       <img src="icon192.png" alt="MémoTruck" class="sa-logo-img" />
       <div class="sa-logo-text">
@@ -511,6 +548,10 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       <span class="sa-badge" id="badge-contrats">0</span>
     </div>
     <div class="sa-nav-item" data-section="journal">🕒 Journal d'activité</div>
+    <div class="sa-nav-item" data-section="erreurs">
+      🐛 Erreurs
+      <span class="sa-badge" id="badge-erreurs">0</span>
+    </div>
     <div class="sa-nav-item" data-section="superadmins">🔐 Comptes superadmin</div>
 
     <div class="sa-sidebar-footer">
@@ -772,6 +813,27 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
 
 <script>
 const SUPABASE_URL = "https://ztlxxrywxxflqvigwncb.supabase.co";
+
+// ─── Monitoring erreurs client ─────────────────────────────────────────
+// Best-effort : ne doit jamais bloquer ni ralentir l'app si le logging échoue.
+(function () {
+  const MAX_ERRORS = 8;
+  let sent = 0;
+  function report(message, stack) {
+    if (sent >= MAX_ERRORS || !message) return;
+    sent++;
+    try {
+      fetch(`${SUPABASE_URL}/functions/v1/log-client-error`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app: "superadmin", message: String(message).slice(0, 2000), stack: stack ? String(stack).slice(0, 4000) : null, url: location.href }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  }
+  window.addEventListener("error", (e) => report(e.message, e.error && e.error.stack));
+  window.addEventListener("unhandledrejection", (e) => report(e.reason && e.reason.message ? e.reason.message : String(e.reason), e.reason && e.reason.stack));
+})();
 const STORAGE_KEY  = "memotruck_superadmin_session";
 
 // ─── Session ────────────────────────────────────────────────────────────
@@ -982,15 +1044,23 @@ function daysDiff(iso) {
   if (!iso) return null;
   return Math.floor((new Date(iso) - Date.now()) / 86400000);
 }
+// Limite de véhicules moteurs (tracteurs + engins, les remorques ne comptent
+// pas) par pack — doit rester synchro avec PACKS_LIMITES dans
+// memotruck-web-admin-test/admin.js (source de vérité pour l'application du
+// blocage côté client).
+const PACK_VEHICULE_LIMIT = { starter: 5, pme: 15, pro: 35, entreprise: Infinity };
+
 function packBadge(pack) {
   const packs = {
-    starter:    { label: "Starter",    color: "badge-blue",  max: "5"  },
-    pme:        { label: "PME",        color: "badge-green", max: "15" },
-    pro:        { label: "Pro",        color: "badge-blue",  max: "35" },
-    entreprise: { label: "Entreprise", color: "badge-green", max: "∞"  },
+    starter:    { label: "Starter",    color: "badge-blue"  },
+    pme:        { label: "PME",        color: "badge-green" },
+    pro:        { label: "Pro",        color: "badge-blue"  },
+    entreprise: { label: "Entreprise", color: "badge-green" },
   };
-  const p = packs[pack] || { label: pack || "—", color: "badge-blue", max: "?" };
-  return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${p.max})</span></span>`;
+  const p = packs[pack] || { label: pack || "—", color: "badge-blue" };
+  const max = PACK_VEHICULE_LIMIT[pack];
+  const maxLabel = max === undefined ? "?" : max === Infinity ? "∞" : max;
+  return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${maxLabel})</span></span>`;
 }
 
 // ─── Prix des packs / calculs budget ─────────────────────────────────────
@@ -1095,7 +1165,7 @@ function contratBadge(iso) {
 
 // ─── Navigation ─────────────────────────────────────────────────────────
 let currentSection = "dashboard";
-const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", superadmins:"Comptes superadmin" };
+const _saTitles = { dashboard:"Dashboard", entreprises:"Gestion des entreprises", contrats:"Suivi des contrats", journal:"Journal d'activité", erreurs:"Erreurs applicatives", superadmins:"Comptes superadmin" };
 function navigateTo(section) {
   currentSection = section;
   document.querySelectorAll(".sa-nav-item").forEach(el => {
@@ -1103,7 +1173,18 @@ function navigateTo(section) {
   });
   const t = document.getElementById("sa-topbar-title");
   if (t) t.textContent = _saTitles[section] || section;
+  closeMobileDrawer();
   render();
+}
+
+// ─── Drawer mobile (sidebar) ──────────────────────────────────────────────
+function openMobileDrawer() {
+  document.getElementById("sa-sidebar").classList.add("open");
+  document.getElementById("sa-mobile-backdrop").classList.add("show");
+}
+function closeMobileDrawer() {
+  document.getElementById("sa-sidebar").classList.remove("open");
+  document.getElementById("sa-mobile-backdrop").classList.remove("show");
 }
 
 function render() {
@@ -1113,6 +1194,7 @@ function render() {
   if (currentSection === "entreprises") renderEntreprises();
   if (currentSection === "contrats")    renderContrats();
   if (currentSection === "journal")     renderJournal();
+  if (currentSection === "erreurs")     renderErreurs();
   if (currentSection === "superadmins") renderSuperadmins();
 }
 
@@ -1152,6 +1234,61 @@ async function renderJournal() {
                   <span class="journal-time">${new Date(l.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                 </div>`;
               }).join("")}
+            </div>
+          </div>
+        `).join("")}
+    `;
+  } catch (e) {
+    main.innerHTML = `<div class="sa-loading">❌ ${e.message}</div>`;
+  }
+}
+
+const APP_LABEL = { pwa: "📱 PWA chauffeur", admin: "🖥️ Panel bureau/atelier", superadmin: "🛠️ Panel superadmin" };
+const APP_COLOR = { pwa: "#00C2FF", admin: "#F59E0B", superadmin: "#A78BFA" };
+
+async function renderErreurs() {
+  const main = document.getElementById("sa-main");
+  try {
+    const [{ errors, last24h }, { entreprises }] = await Promise.all([
+      api("list_client_errors", { limit: 150 }),
+      api("list_entreprises"),
+    ]);
+
+    const badgeE = document.getElementById("badge-erreurs");
+    if (last24h > 0) { badgeE.textContent = last24h; badgeE.classList.add("show"); }
+    else badgeE.classList.remove("show");
+
+    const entMap = {};
+    (entreprises || []).forEach(e => { entMap[e.id] = e.nom; });
+
+    const byDay = {};
+    const order = [];
+    errors.forEach(err => {
+      const label = journalDayLabel(err.created_at);
+      if (!byDay[label]) { byDay[label] = []; order.push(label); }
+      byDay[label].push(err);
+    });
+
+    main.innerHTML = `
+      <div class="sa-section-title">Erreurs applicatives <span style="font-size:12px;font-weight:600;color:var(--muted);">— ${last24h} dans les dernières 24h</span></div>
+      ${errors.length === 0
+        ? `<div class="sa-loading">Aucune erreur remontée pour l'instant 👍</div>`
+        : order.map(day => `
+          <div class="journal-day">
+            <div class="journal-day-lbl">${esc(day)}</div>
+            <div class="journal-card">
+              ${byDay[day].map(err => `
+                <div class="journal-row" style="align-items:flex-start;">
+                  <span class="journal-icon" style="color:${APP_COLOR[err.app] || 'var(--muted)'};">🐛</span>
+                  <div class="journal-body">
+                    <span class="journal-who" style="background:${(APP_COLOR[err.app]||'#888')}22;color:${APP_COLOR[err.app]||'var(--muted)'};">${esc(APP_LABEL[err.app] || err.app)}</span>
+                    ${err.entreprise_id ? ` <b>${esc(entMap[err.entreprise_id] || err.entreprise_id)}</b>` : ""}
+                    <div style="margin-top:4px;font-family:var(--mono);font-size:11.5px;color:var(--text);word-break:break-word;">${esc(err.message)}</div>
+                    ${err.url ? `<div style="margin-top:2px;font-size:10.5px;color:var(--muted);word-break:break-all;">${esc(err.url)}</div>` : ""}
+                  </div>
+                  <span class="journal-time">${new Date(err.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              `).join("")}
             </div>
           </div>
         `).join("")}
@@ -1318,6 +1455,18 @@ async function renderDashboard() {
     // ── Watchlist ──
     const watchlist = buildWatchlist(entreprises);
 
+    // ── Flottes proches de la limite du pack ──
+    // Véhicules moteurs = tracteurs + engins (mêmes règles que côté panel
+    // admin — les remorques ne comptent pas, voir PACKS_LIMITES là-bas).
+    const fleetAlerts = entreprises
+      .map(e => {
+        const limite = PACK_VEHICULE_LIMIT[e.pack] ?? 5;
+        const nb = (e.tracteurs || 0) + (e.engins || 0);
+        return { id: e.id, nom: e.nom, pack: e.pack, limite, nb, ratio: limite === Infinity ? 0 : nb / limite };
+      })
+      .filter(e => e.limite !== Infinity && e.ratio >= 0.8)
+      .sort((a, b) => b.ratio - a.ratio);
+
     // ── Budget table (top 8) ──
     const budgetTop = rows.slice(0, 8);
     const budgetRest = rows.length - budgetTop.length;
@@ -1384,6 +1533,20 @@ async function renderDashboard() {
           </div>
         </div>
       </div>
+
+      ${fleetAlerts.length ? `
+      <div class="dash-card">
+        <div class="dash-card-title">🚛 Flottes proches de la limite du pack <span class="n">${fleetAlerts.length}</span></div>
+        <div>
+          ${fleetAlerts.map(f => `
+            <div class="sa-alert-row" data-fleet-edit="${f.id}">
+              <span class="sa-alert-nom">${esc(f.nom)} <span style="color:var(--muted);font-weight:600;">— ${PACK_LABEL[f.pack] || f.pack}</span></span>
+              <span class="badge ${f.ratio >= 1 ? 'badge-red' : 'badge-orange'}">${f.nb}/${f.limite} véhicules${f.ratio >= 1 ? ' — Limite atteinte' : ''}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+      ` : ""}
 
       <div class="dash-botrow">
         <div class="dash-card">
@@ -1457,6 +1620,14 @@ async function renderDashboard() {
     `;
 
     document.getElementById("dash-btn-new").addEventListener("click", () => ouvrirModalEntreprise(null));
+    document.querySelectorAll("[data-fleet-edit]").forEach(row => {
+      row.style.cursor = "pointer";
+      row.title = "Modifier le pack de cette entreprise";
+      row.addEventListener("click", () => {
+        const e = entreprises.find(x => x.id === row.dataset.fleetEdit);
+        if (e) ouvrirModalEntreprise(e);
+      });
+    });
     const searchInput = document.getElementById("dash-search-input");
     const runDashSearch = () => {
       _entreprisesSearchTerm = searchInput.value.trim();
@@ -1652,7 +1823,10 @@ async function afficherDetailEntreprise(id) {
   zone.innerHTML = `<div class="sa-loading">Chargement admins…</div>`;
 
   try {
-    const { admins } = await api("list_admins", { entreprise_id: id });
+    const [{ admins }, usage] = await Promise.all([
+      api("list_admins", { entreprise_id: id }),
+      e.panel_mecano_actif ? api("entreprise_usage", { entreprise_id: id }).catch(() => null) : Promise.resolve(null),
+    ]);
     zone.innerHTML = `
       <div class="detail-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1698,6 +1872,15 @@ async function afficherDetailEntreprise(id) {
             </div>
           `).join("") || `<div style="font-size:12px;color:var(--muted);">Aucun admin</div>`}
         </div>
+
+        ${usage ? `
+        <div>
+          <div class="detail-section-title">🔧 USAGE ATELIER</div>
+          <div class="detail-row"><span class="detail-label">Tickets ce mois</span><span class="detail-val">${usage.ticketsCeMois}</span></div>
+          <div class="detail-row"><span class="detail-label">Tickets en cours</span><span class="detail-val">${usage.ticketsEnCours > 0 ? `<span class="badge badge-orange">${usage.ticketsEnCours}</span>` : "0"}</span></div>
+          <div class="detail-row"><span class="detail-label">Dernier ticket</span><span class="detail-val">${usage.dernierTicketAt ? formatDateTime(usage.dernierTicketAt) : "—"}</span></div>
+        </div>
+        ` : ""}
 
         ${e.notes ? `<div><div class="detail-section-title">NOTES</div><div style="font-size:12px;color:var(--muted);">${esc(e.notes)}</div></div>` : ""}
       </div>
@@ -2116,6 +2299,8 @@ document.getElementById("btn-logout").addEventListener("click", () => {
 document.querySelectorAll(".sa-nav-item[data-section]").forEach(el => {
   el.addEventListener("click", () => navigateTo(el.dataset.section));
 });
+document.getElementById("btn-mobile-menu").addEventListener("click", openMobileDrawer);
+document.getElementById("sa-mobile-backdrop").addEventListener("click", closeMobileDrawer);
 
 // ─── Affichage app ──────────────────────────────────────────────────────
 function showApp() {
