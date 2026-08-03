@@ -1019,15 +1019,23 @@ function daysDiff(iso) {
   if (!iso) return null;
   return Math.floor((new Date(iso) - Date.now()) / 86400000);
 }
+// Limite de véhicules moteurs (tracteurs + engins, les remorques ne comptent
+// pas) par pack — doit rester synchro avec PACKS_LIMITES dans
+// memotruck-web-admin-test/admin.js (source de vérité pour l'application du
+// blocage côté client).
+const PACK_VEHICULE_LIMIT = { starter: 5, pme: 15, pro: 35, entreprise: Infinity };
+
 function packBadge(pack) {
   const packs = {
-    starter:    { label: "Starter",    color: "badge-blue",  max: "5"  },
-    pme:        { label: "PME",        color: "badge-green", max: "15" },
-    pro:        { label: "Pro",        color: "badge-blue",  max: "35" },
-    entreprise: { label: "Entreprise", color: "badge-green", max: "∞"  },
+    starter:    { label: "Starter",    color: "badge-blue"  },
+    pme:        { label: "PME",        color: "badge-green" },
+    pro:        { label: "Pro",        color: "badge-blue"  },
+    entreprise: { label: "Entreprise", color: "badge-green" },
   };
-  const p = packs[pack] || { label: pack || "—", color: "badge-blue", max: "?" };
-  return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${p.max})</span></span>`;
+  const p = packs[pack] || { label: pack || "—", color: "badge-blue" };
+  const max = PACK_VEHICULE_LIMIT[pack];
+  const maxLabel = max === undefined ? "?" : max === Infinity ? "∞" : max;
+  return `<span class="badge ${p.color}">${p.label} <span style="opacity:0.7;font-size:10px;">(${maxLabel})</span></span>`;
 }
 
 // ─── Prix des packs / calculs budget ─────────────────────────────────────
@@ -1366,6 +1374,18 @@ async function renderDashboard() {
     // ── Watchlist ──
     const watchlist = buildWatchlist(entreprises);
 
+    // ── Flottes proches de la limite du pack ──
+    // Véhicules moteurs = tracteurs + engins (mêmes règles que côté panel
+    // admin — les remorques ne comptent pas, voir PACKS_LIMITES là-bas).
+    const fleetAlerts = entreprises
+      .map(e => {
+        const limite = PACK_VEHICULE_LIMIT[e.pack] ?? 5;
+        const nb = (e.tracteurs || 0) + (e.engins || 0);
+        return { id: e.id, nom: e.nom, pack: e.pack, limite, nb, ratio: limite === Infinity ? 0 : nb / limite };
+      })
+      .filter(e => e.limite !== Infinity && e.ratio >= 0.8)
+      .sort((a, b) => b.ratio - a.ratio);
+
     // ── Budget table (top 8) ──
     const budgetTop = rows.slice(0, 8);
     const budgetRest = rows.length - budgetTop.length;
@@ -1432,6 +1452,20 @@ async function renderDashboard() {
           </div>
         </div>
       </div>
+
+      ${fleetAlerts.length ? `
+      <div class="dash-card">
+        <div class="dash-card-title">🚛 Flottes proches de la limite du pack <span class="n">${fleetAlerts.length}</span></div>
+        <div>
+          ${fleetAlerts.map(f => `
+            <div class="sa-alert-row" data-fleet-edit="${f.id}">
+              <span class="sa-alert-nom">${esc(f.nom)} <span style="color:var(--muted);font-weight:600;">— ${PACK_LABEL[f.pack] || f.pack}</span></span>
+              <span class="badge ${f.ratio >= 1 ? 'badge-red' : 'badge-orange'}">${f.nb}/${f.limite} véhicules${f.ratio >= 1 ? ' — Limite atteinte' : ''}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+      ` : ""}
 
       <div class="dash-botrow">
         <div class="dash-card">
@@ -1505,6 +1539,14 @@ async function renderDashboard() {
     `;
 
     document.getElementById("dash-btn-new").addEventListener("click", () => ouvrirModalEntreprise(null));
+    document.querySelectorAll("[data-fleet-edit]").forEach(row => {
+      row.style.cursor = "pointer";
+      row.title = "Modifier le pack de cette entreprise";
+      row.addEventListener("click", () => {
+        const e = entreprises.find(x => x.id === row.dataset.fleetEdit);
+        if (e) ouvrirModalEntreprise(e);
+      });
+    });
     const searchInput = document.getElementById("dash-search-input");
     const runDashSearch = () => {
       _entreprisesSearchTerm = searchInput.value.trim();
@@ -1700,7 +1742,10 @@ async function afficherDetailEntreprise(id) {
   zone.innerHTML = `<div class="sa-loading">Chargement admins…</div>`;
 
   try {
-    const { admins } = await api("list_admins", { entreprise_id: id });
+    const [{ admins }, usage] = await Promise.all([
+      api("list_admins", { entreprise_id: id }),
+      e.panel_mecano_actif ? api("entreprise_usage", { entreprise_id: id }).catch(() => null) : Promise.resolve(null),
+    ]);
     zone.innerHTML = `
       <div class="detail-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1746,6 +1791,15 @@ async function afficherDetailEntreprise(id) {
             </div>
           `).join("") || `<div style="font-size:12px;color:var(--muted);">Aucun admin</div>`}
         </div>
+
+        ${usage ? `
+        <div>
+          <div class="detail-section-title">🔧 USAGE ATELIER</div>
+          <div class="detail-row"><span class="detail-label">Tickets ce mois</span><span class="detail-val">${usage.ticketsCeMois}</span></div>
+          <div class="detail-row"><span class="detail-label">Tickets en cours</span><span class="detail-val">${usage.ticketsEnCours > 0 ? `<span class="badge badge-orange">${usage.ticketsEnCours}</span>` : "0"}</span></div>
+          <div class="detail-row"><span class="detail-label">Dernier ticket</span><span class="detail-val">${usage.dernierTicketAt ? formatDateTime(usage.dernierTicketAt) : "—"}</span></div>
+        </div>
+        ` : ""}
 
         ${e.notes ? `<div><div class="detail-section-title">NOTES</div><div style="font-size:12px;color:var(--muted);">${esc(e.notes)}</div></div>` : ""}
       </div>
