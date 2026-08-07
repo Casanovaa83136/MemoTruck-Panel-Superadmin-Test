@@ -588,8 +588,8 @@ tbody tr:hover{background:rgba(0,194,255,0.03)}
       </select>
     </div>
     <div class="sa-field" id="modal-montant-perso-row" style="display:none;">
-      <label>MONTANT MENSUEL NÉGOCIÉ (€) *</label>
-      <input type="number" id="modal-montant-perso" placeholder="450" min="0" step="1" />
+      <label>MONTANT MENSUEL NÉGOCIÉ (€)</label>
+      <input type="number" id="modal-montant-perso" placeholder="450 — laisser vide si sur devis" min="0" step="1" />
     </div>
     <div class="sa-field-row">
       <div class="sa-field">
@@ -890,6 +890,17 @@ function toast(msg) {
 function esc(s) {
   return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
+function isValidEmail(s) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || "").trim());
+}
+// Valide email + mot de passe pour les formulaires de création de compte
+// (entreprise, admin, superadmin) — évite d'envoyer une saisie manifestement
+// invalide au backend pour ne récupérer qu'un message d'erreur brut.
+function validerIdentifiants(email, password) {
+  if (!isValidEmail(email)) return "Adresse email invalide";
+  if (!password || password.trim().length < 8) return "Le mot de passe doit faire au moins 8 caractères";
+  return null;
+}
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -978,8 +989,17 @@ function showCredentialsModal({ email, password, code }) {
   else { codeRow.style.display = "none"; }
   document.getElementById("modal-credentials").classList.add("open");
 }
-document.getElementById("modal-credentials-close").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
-document.getElementById("modal-credentials-done").addEventListener("click", () => document.getElementById("modal-credentials").classList.remove("open"));
+// Efface les identifiants affichés à la fermeture — ils ne doivent pas
+// rester lisibles dans le DOM (inspecteur, autofill) une fois la modale
+// fermée par l'admin qui vient de les copier/transmettre.
+function closeCredentialsModal() {
+  document.getElementById("modal-credentials").classList.remove("open");
+  document.getElementById("cred-email").value = "";
+  document.getElementById("cred-password").value = "";
+  document.getElementById("cred-code").value = "";
+}
+document.getElementById("modal-credentials-close").addEventListener("click", closeCredentialsModal);
+document.getElementById("modal-credentials-done").addEventListener("click", closeCredentialsModal);
 document.getElementById("cred-copy-email").addEventListener("click", () => copyText(document.getElementById("cred-email").value));
 document.getElementById("cred-copy-password").addEventListener("click", () => copyText(document.getElementById("cred-password").value));
 document.getElementById("cred-copy-code").addEventListener("click", () => copyText(document.getElementById("cred-code").value));
@@ -1227,7 +1247,7 @@ async function renderJournal() {
                 <div class="journal-row">
                   <span class="journal-icon">${(ACTIVITY_LABELS[l.action] || { icon: "•" }).icon}</span>
                   <div class="journal-body">
-                    <span class="journal-who" style="background:${color}22;color:${color};">${esc(l.superadmin_email.split("@")[0])}</span>
+                    <span class="journal-who" style="background:${color}22;color:${color};">${esc((l.superadmin_email || "—").split("@")[0])}</span>
                     ${ACTIVITY_VERB[l.action] || esc(l.action)}${l.entreprise_nom ? ` <b>${esc(l.entreprise_nom)}</b>` : ""}${l.details ? ` <span style="color:var(--muted);">(${esc(l.details)})</span>` : ""}
                   </div>
                   <span class="journal-time">${new Date(l.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
@@ -1683,12 +1703,22 @@ function updateBulkBar() {
   });
   const doBulkToggle = async (list, active) => {
     if (!confirm(`${active ? "Réactiver" : "Suspendre"} ${list.length} entreprise(s) ?\n${list.map(e => e.nom).join(", ")}`)) return;
-    try {
-      await Promise.all(list.map(e => api("toggle_entreprise", { entreprise_id: e.id, est_active: active })));
-      toast(active ? "✅ Entreprises réactivées" : "⛔ Entreprises suspendues");
-      _entSelected.clear();
-      renderEntreprises();
-    } catch (err) { toast("❌ " + err.message); }
+    // allSettled : une entreprise en échec (RLS, réseau…) ne doit pas faire
+    // perdre le résultat des autres — on rapporte précisément qui a échoué
+    // et on rafraîchit toujours la liste pour refléter l'état réel en base.
+    const results = await Promise.allSettled(list.map(e => api("toggle_entreprise", { entreprise_id: e.id, est_active: active })));
+    const failed = results
+      .map((r, i) => ({ r, e: list[i] }))
+      .filter(({ r }) => r.status === "rejected");
+    const okCount = list.length - failed.length;
+    if (okCount > 0) {
+      toast(active ? `✅ ${okCount} entreprise(s) réactivée(s)` : `⛔ ${okCount} entreprise(s) suspendue(s)`);
+    }
+    if (failed.length > 0) {
+      toast(`❌ Échec pour : ${failed.map(({ e }) => e.nom).join(", ")}`);
+    }
+    _entSelected.clear();
+    renderEntreprises();
   };
   document.getElementById("bulk-suspend")?.addEventListener("click", () => doBulkToggle(activeSel, false));
   document.getElementById("bulk-reactivate")?.addEventListener("click", () => doBulkToggle(suspSel, true));
@@ -1743,9 +1773,9 @@ async function renderEntreprises() {
               <div class="ent-col"><span class="pack-pill ${PACK_PILL_CLASS[e.pack] || ''}">${esc(PACK_LABEL[e.pack] || e.pack || '—')}</span></div>
               <div class="ent-col"><span class="status-pill ${e.est_active ? 'status-pill-active' : 'status-pill-suspended'}">${e.est_active ? 'Active' : 'Suspendue'}</span></div>
               <div class="ent-col">${contratBadge(e.date_fin_contrat)}</div>
-              <div class="ent-col-num"><div class="ent-num-val">${e.chauffeurs}</div><div class="ent-num-lbl">Chauf.</div></div>
-              <div class="ent-col-num"><div class="ent-num-val">${e.tracteurs}</div><div class="ent-num-lbl">Tract.</div></div>
-              <div class="ent-col-num"><div class="ent-num-val">${e.admins}</div><div class="ent-num-lbl">Admins</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.chauffeurs ?? 0}</div><div class="ent-num-lbl">Chauf.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.tracteurs ?? 0}</div><div class="ent-num-lbl">Tract.</div></div>
+              <div class="ent-col-num"><div class="ent-num-val">${e.admins ?? 0}</div><div class="ent-num-lbl">Admins</div></div>
               <div class="ent-actions">
                 <button class="btn btn-ghost btn-sm btn-icon" data-detail="${e.id}" title="Détail">👁️</button>
                 <button class="btn btn-ghost btn-sm btn-icon" data-edit="${e.id}" title="Modifier">✏️</button>
@@ -2044,8 +2074,6 @@ document.getElementById("modal-entreprise-cancel").addEventListener("click", () 
 document.getElementById("modal-entreprise-save").addEventListener("click", async () => {
   const errEl = document.getElementById("modal-entreprise-error");
   errEl.textContent = "";
-  const btn = document.getElementById("modal-entreprise-save");
-  btn.disabled = true; btn.textContent = "…";
 
   const payload = {
     nom:                 document.getElementById("modal-nom").value.trim(),
@@ -2060,6 +2088,21 @@ document.getElementById("modal-entreprise-save").addEventListener("click", async
     montant_mensuel_personnalise: document.getElementById("modal-montant-perso").value || null,
     panel_mecano_actif:  document.getElementById("modal-panel-mecano").checked,
   };
+
+  // Validation côté client — évite un aller-retour serveur pour une saisie
+  // manifestement incomplète/incohérente.
+  if (!payload.nom) { errEl.textContent = "❌ Le nom de l'entreprise est requis"; return; }
+  if (payload.date_debut_contrat && payload.date_fin_contrat && payload.date_fin_contrat < payload.date_debut_contrat) {
+    errEl.textContent = "❌ La date de fin de contrat ne peut pas être avant la date de début";
+    return;
+  }
+  if (!_editingEntrepriseId) {
+    const err = validerIdentifiants(document.getElementById("modal-admin-email").value, document.getElementById("modal-admin-password").value);
+    if (err) { errEl.textContent = "❌ " + err; return; }
+  }
+
+  const btn = document.getElementById("modal-entreprise-save");
+  btn.disabled = true; btn.textContent = "…";
 
   try {
     if (_editingEntrepriseId) {
@@ -2110,10 +2153,15 @@ document.getElementById("modal-admin-cancel").addEventListener("click", () => do
 document.getElementById("modal-admin-save").addEventListener("click", async () => {
   const errEl = document.getElementById("modal-admin-error");
   const btn   = document.getElementById("modal-admin-save");
-  errEl.textContent = ""; btn.disabled = true; btn.textContent = "…";
+  errEl.textContent = "";
+
+  const email    = document.getElementById("modal-admin2-email").value.trim();
+  const password = document.getElementById("modal-admin2-password").value;
+  const validErr = validerIdentifiants(email, password);
+  if (validErr) { errEl.textContent = "❌ " + validErr; return; }
+
+  btn.disabled = true; btn.textContent = "…";
   try {
-    const email    = document.getElementById("modal-admin2-email").value.trim();
-    const password = document.getElementById("modal-admin2-password").value;
     const roleRowVisible = document.getElementById("modal-admin2-role-row").style.display !== "none";
     await api("create_admin", {
       entreprise_id: _adminEntrepriseId,
